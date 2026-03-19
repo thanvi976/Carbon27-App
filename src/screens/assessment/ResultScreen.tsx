@@ -1,7 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, Share, Text, View } from 'react-native';
-import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import type { HomeStackParamList } from '../../navigation/types';
 import { COLORS } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 import { Button } from '../../components/ui/Button';
@@ -14,10 +12,8 @@ import { isoNow, formatDateShort } from '../../utils/dateHelpers';
 import { recordAssessment, upsertUser } from '../../services/firestore';
 import { linkedInShareText } from '../../utils/shareText';
 import { useStreakStore } from '../../store/streakStore';
-
-type Props = NativeStackScreenProps<HomeStackParamList, 'Result'>;
-
-export function ResultScreen({ navigation }: Props) {
+export function ResultScreen(props: any) {
+  const { navigation } = props;
   const { responses, resetQuiz } = useQuizStore();
   const user = useAuthStore((s) => s.user);
   const setUser = useAuthStore((s) => s.setUser);

@@ -1,16 +1,12 @@
 import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, Text, View } from 'react-native';
-import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import type { HomeStackParamList } from '../../navigation/types';
 import { screenStyles } from '../_shared/styles';
 import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
 import { useAuthStore } from '../../store/authStore';
 import { upsertUser } from '../../services/firestore';
-
-type Props = NativeStackScreenProps<HomeStackParamList, 'EmailCapture'>;
-
-export function EmailCaptureScreen({ navigation }: Props) {
+export function EmailCaptureScreen(props: any) {
+  const { navigation } = props;
   const user = useAuthStore((s) => s.user);
   const setUser = useAuthStore((s) => s.setUser);
   const [name, setName] = useState(user?.name ?? '');

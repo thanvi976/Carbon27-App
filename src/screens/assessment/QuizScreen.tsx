@@ -1,7 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, Pressable, Text, View } from 'react-native';
-import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import type { HomeStackParamList } from '../../navigation/types';
 import { QUESTIONS } from '../../constants/questions';
 import { COLORS } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
@@ -11,8 +9,6 @@ import { Button } from '../../components/ui/Button';
 import { useQuizStore } from '../../store/quizStore';
 import Svg, { Path } from 'react-native-svg';
 
-type Props = NativeStackScreenProps<HomeStackParamList, 'Quiz'>;
-
 function Checkmark() {
   return (
     <Svg width={18} height={18} viewBox="0 0 24 24">
@@ -21,7 +17,8 @@ function Checkmark() {
   );
 }
 
-export function QuizScreen({ navigation }: Props) {
+export function QuizScreen(props: any) {
+  const { navigation } = props;
   const { currentIndex, setCurrentIndex, responses, setAnswer } = useQuizStore();
   const q = QUESTIONS[currentIndex];
   const answer = responses[q.id];

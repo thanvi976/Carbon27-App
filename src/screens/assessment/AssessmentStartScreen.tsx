@@ -1,14 +1,10 @@
 import { Text, View } from 'react-native';
-import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import type { HomeStackParamList } from '../../navigation/types';
 import { COLORS } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 import { Button } from '../../components/ui/Button';
 import { useQuizStore } from '../../store/quizStore';
-
-type Props = NativeStackScreenProps<HomeStackParamList, 'AssessmentStart'>;
-
-export function AssessmentStartScreen({ navigation }: Props) {
+export function AssessmentStartScreen(props: any) {
+  const { navigation } = props;
   const resetQuiz = useQuizStore((s) => s.resetQuiz);
   return (
     <View style={{ flex: 1, backgroundColor: COLORS.bgPrimary, padding: 20, justifyContent: 'center' }}>
