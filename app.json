@@ -1,0 +1,13 @@
+{
+  "expo": {
+    "name": "Carbon27",
+    "slug": "carbon27",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "newArchEnabled": false,
+    "userInterfaceStyle": "dark",
+    "ios": { "supportsTablet": false },
+    "android": {},
+    "plugins": ["expo-notifications"]
+  }
+}
