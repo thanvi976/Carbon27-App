@@ -1,14 +1,11 @@
 import { useEffect, useRef } from 'react';
 import { Animated, Text, View } from 'react-native';
-import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { COLORS } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
-import type { AuthStackParamList } from '../../navigation/types';
 import { useStreakStore } from '../../store/streakStore';
 
-type Props = NativeStackScreenProps<AuthStackParamList, 'Splash'>;
-
-export function SplashScreen({ navigation }: Props) {
+export function SplashScreen(props: any) {
+  const { navigation } = props;
   const opacity = useRef(new Animated.Value(0)).current;
   const checkIn = useStreakStore((s) => s.checkIn);
 

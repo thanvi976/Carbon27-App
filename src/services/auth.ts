@@ -1,20 +1,17 @@
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile } from 'firebase/auth';
-import { auth } from './firebase';
-
-export async function signupEmailPassword(name: string, email: string, password: string) {
-  const cred = await createUserWithEmailAndPassword(auth, email.trim(), password);
-  if (name.trim()) {
-    await updateProfile(cred.user, { displayName: name.trim() });
-  }
-  return cred.user;
-}
-
+import { useAuthStore } from '../store/authStore';
 export async function loginEmailPassword(email: string, password: string) {
-  const cred = await signInWithEmailAndPassword(auth, email.trim(), password);
-  return cred.user;
+  // Mock login - will be replaced with real Firebase Auth in dev build
+  const mockUser = { uid: 'mock-uid-123', email, displayName: email.split('@')[0] };
+  useAuthStore.getState().setUser(mockUser as any);
+  return mockUser;
 }
-
-export async function logout() {
-  await signOut(auth);
+export async function signupEmailPassword(name: string, email: string, password: string) {
+  // Mock signup - will be replaced with real Firebase Auth in dev build
+  const mockUser = { uid: 'mock-uid-123', email, displayName: name };
+  useAuthStore.getState().setUser(mockUser as any);
+  return mockUser;
+}
+export async function logoutUser() {
+  useAuthStore.getState().setUser(null);
 }
 

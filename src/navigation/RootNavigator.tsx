@@ -8,7 +8,7 @@ import { TabNavigator } from './TabNavigator';
 import { COLORS } from '../constants/colors';
 import { getUser, upsertUser } from '../services/firestore';
 
-export function RootNavigator() {
+export default function RootNavigator() {
   const { user, setUser, hydrated } = useAuthStore();
   const [booting, setBooting] = useState(true);
 

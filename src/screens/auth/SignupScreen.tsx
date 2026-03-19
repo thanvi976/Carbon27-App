@@ -1,18 +1,14 @@
 import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, Text, TouchableOpacity, View } from 'react-native';
-import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import type { AuthStackParamList } from '../../navigation/types';
 import { screenStyles } from '../_shared/styles';
 import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
 import { COLORS } from '../../constants/colors';
 import { signupEmailPassword } from '../../services/auth';
 import { upsertUser } from '../../services/firestore';
-
-type Props = NativeStackScreenProps<AuthStackParamList, 'Signup'>;
 
 const schema = z.object({
   name: z.string().min(2),
@@ -21,7 +17,8 @@ const schema = z.object({
 });
 type Form = z.infer<typeof schema>;
 
-export function SignupScreen({ navigation }: Props) {
+export function SignupScreen(props: any) {
+  const { navigation } = props;
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const {
@@ -57,6 +54,8 @@ export function SignupScreen({ navigation }: Props) {
         certificateId: null,
         orgId: null,
       });
+      // With mock auth (no Firebase Auth), route directly.
+      navigation.replace('Home' as any);
     } catch (e: any) {
       setError(e?.message ?? 'Signup failed. Please try again.');
     } finally {

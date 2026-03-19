@@ -1,16 +1,12 @@
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
-import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { COLORS } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 import { ScoreRing } from '../../components/ui/ScoreRing';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
-import type { HomeStackParamList } from '../../navigation/types';
 import { useAuthStore } from '../../store/authStore';
 import Svg, { Path } from 'react-native-svg';
-
-type Props = NativeStackScreenProps<HomeStackParamList, 'Home'>;
 
 function BellIcon() {
   return (
@@ -23,7 +19,8 @@ function BellIcon() {
   );
 }
 
-export function HomeScreen({ navigation }: Props) {
+export function HomeScreen(props: any) {
+  const { navigation } = props;
   const user = useAuthStore((s) => s.user);
   const score = user?.score ?? 0;
   const level = user?.level ?? 'Carbon Rookie';

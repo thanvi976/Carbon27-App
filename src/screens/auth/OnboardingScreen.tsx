@@ -1,13 +1,9 @@
 import { useMemo, useRef, useState } from 'react';
 import { Dimensions, FlatList, Text, View } from 'react-native';
-import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import type { AuthStackParamList } from '../../navigation/types';
 import { COLORS } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 import { Button } from '../../components/ui/Button';
 import Svg, { Path, Circle } from 'react-native-svg';
-
-type Props = NativeStackScreenProps<AuthStackParamList, 'Onboarding'>;
 
 const { width } = Dimensions.get('window');
 
@@ -40,7 +36,8 @@ function SlideArt({ kind }: { kind: 1 | 2 | 3 }) {
   );
 }
 
-export function OnboardingScreen({ navigation }: Props) {
+export function OnboardingScreen(props: any) {
+  const { navigation } = props;
   const slides = useMemo(
     () => [
       { num: '01', title: 'Know Your Impact', kind: 1 as const },

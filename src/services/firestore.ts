@@ -16,17 +16,8 @@ import { db } from './firebase';
 import type { Assessment, CarbonUser, Organisation } from '../types';
 import type { LevelName } from '../constants/levels';
 
-export async function upsertUser(uid: string, data: Partial<CarbonUser>) {
-  const ref = doc(db, 'users', uid);
-  await setDoc(
-    ref,
-    {
-      ...data,
-      updatedAt: serverTimestamp(),
-      createdAt: (data as any).createdAt ?? serverTimestamp(),
-    },
-    { merge: true }
-  );
+export async function upsertUser(uid: string, data: any) {
+  console.log('upsertUser mock:', uid, data);
 }
 
 export async function getUser(uid: string): Promise<CarbonUser | null> {

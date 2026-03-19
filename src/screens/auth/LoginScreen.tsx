@@ -1,17 +1,13 @@
 import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, Text, TouchableOpacity, View } from 'react-native';
-import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import type { AuthStackParamList } from '../../navigation/types';
 import { screenStyles } from '../_shared/styles';
 import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
 import { COLORS } from '../../constants/colors';
 import { loginEmailPassword } from '../../services/auth';
-
-type Props = NativeStackScreenProps<AuthStackParamList, 'Login'>;
 
 const schema = z.object({
   email: z.string().email(),
@@ -19,7 +15,8 @@ const schema = z.object({
 });
 type Form = z.infer<typeof schema>;
 
-export function LoginScreen({ navigation }: Props) {
+export function LoginScreen(props: any) {
+  const { navigation } = props;
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const {
@@ -37,7 +34,8 @@ export function LoginScreen({ navigation }: Props) {
     setLoading(true);
     try {
       await loginEmailPassword(values.email, values.password);
-      // RootNavigator will handle routing on auth state change.
+      // With mock auth (no Firebase Auth), route directly.
+      navigation.replace('Home' as any);
     } catch (e: any) {
       setError(e?.message ?? 'Login failed. Please try again.');
     } finally {

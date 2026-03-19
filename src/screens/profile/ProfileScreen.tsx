@@ -6,7 +6,7 @@ import { Card } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { ScoreHistoryChart } from '../../components/charts/ScoreHistoryChart';
 import { Button } from '../../components/ui/Button';
-import { logout } from '../../services/auth';
+import { logoutUser } from '../../services/auth';
 
 function initials(name: string) {
   const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -85,7 +85,7 @@ export function ProfileScreen() {
         variant="secondary"
         onPress={async () => {
           try {
-            await logout();
+            await logoutUser();
           } finally {
             setUser(null);
           }

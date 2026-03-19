@@ -9,9 +9,9 @@ export async function setupNotifications() {
       body: "Your planet needs you today.",
     },
     trigger: {
+      type: Notifications.SchedulableTriggerInputTypes.DAILY,
       hour: 9,
       minute: 0,
-      repeats: true,
     },
   });
 }
