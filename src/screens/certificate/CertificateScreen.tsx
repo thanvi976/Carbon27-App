@@ -1,19 +1,15 @@
 import { useMemo, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
-import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
-import type { HomeStackParamList } from '../../navigation/types';
 import { COLORS } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { certificateHTML } from '../../utils/certificate';
 import type { LevelName } from '../../constants/levels';
-
-type Props = NativeStackScreenProps<HomeStackParamList, 'Certificate'>;
-
-export function CertificateScreen({ route }: Props) {
+export function CertificateScreen(props: any) {
+  const { route } = props;
   const params = route.params;
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);

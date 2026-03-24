@@ -9,8 +9,14 @@ import { SignupScreen } from './src/screens/auth/SignupScreen';
 import { HomeScreen } from './src/screens/home/HomeScreen';
 import { AssessmentStartScreen } from './src/screens/assessment/AssessmentStartScreen';
 import { QuizScreen } from './src/screens/assessment/QuizScreen';
+import { EmailCaptureScreen } from './src/screens/assessment/EmailCaptureScreen';
 import { ResultScreen } from './src/screens/assessment/ResultScreen';
+import { CertificateScreen } from './src/screens/certificate/CertificateScreen';
+import { StreaksScreen } from './src/screens/streaks/StreaksScreen';
+import { ProfileScreen } from './src/screens/profile/ProfileScreen';
+
 const Stack = createNativeStackNavigator();
+
 export default function App() {
   return (
     <NavigationContainer>
@@ -22,7 +28,11 @@ export default function App() {
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="AssessmentStart" component={AssessmentStartScreen} />
         <Stack.Screen name="Quiz" component={QuizScreen} />
+        <Stack.Screen name="EmailCapture" component={EmailCaptureScreen} />
         <Stack.Screen name="Result" component={ResultScreen} />
+        <Stack.Screen name="Certificate" component={CertificateScreen} />
+        <Stack.Screen name="Streaks" component={StreaksScreen} />
+        <Stack.Screen name="Profile" component={ProfileScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
