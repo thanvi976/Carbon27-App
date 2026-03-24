@@ -6,8 +6,13 @@
     "orientation": "portrait",
     "newArchEnabled": true,
     "userInterfaceStyle": "dark",
-    "ios": { "supportsTablet": false },
+    "ios": {
+      "supportsTablet": false
+    },
     "android": {},
-    "plugins": ["expo-notifications"]
+    "plugins": [
+      "expo-notifications",
+      "expo-asset"
+    ]
   }
 }

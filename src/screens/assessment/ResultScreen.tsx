@@ -22,9 +22,10 @@ export function ResultScreen(props: any) {
   const [offline, setOffline] = useState(false);
   const [saving, setSaving] = useState(true);
   const [displayScore, setDisplayScore] = useState(0);
+  const responsesSnapshot = useRef(responses).current;
 
-  const { score, level, badges } = useMemo(() => scoreFromResponses(responses), [responses]);
-  const tips = useMemo(() => improvementTips(responses), [responses]);
+  const { score, level, badges } = useMemo(() => scoreFromResponses(responsesSnapshot), [responsesSnapshot]);
+  const tips = useMemo(() => improvementTips(responsesSnapshot), [responsesSnapshot]);
 
   const anim = useRef(new Animated.Value(0)).current;
   const particles = useRef(Array.from({ length: 12 }, () => new Animated.Value(0))).current;
@@ -74,7 +75,7 @@ export function ResultScreen(props: any) {
           score,
           level,
           badges,
-          responses,
+          responses: responsesSnapshot,
           lastAssessmentDate: now,
           certificateId: certId,
           scoreHistory: history,
@@ -82,7 +83,7 @@ export function ResultScreen(props: any) {
           bestStreak: user.bestStreak,
           lastCheckIn: user.lastCheckIn,
         });
-        await recordAssessment({ uid: user.uid, score, level, badges, responses });
+        await recordAssessment({ uid: user.uid, score, level, badges, responses: responsesSnapshot });
       } catch (e: any) {
         setOffline(true);
         setError(e?.message ?? 'Could not sync. Showing cached result.');
@@ -95,7 +96,7 @@ export function ResultScreen(props: any) {
     return () => {
       mounted = false;
     };
-  }, [badges, checkIn, level, resetQuiz, responses, score, setUser, user]);
+  }, []);
 
   const certId = user?.certificateId ?? `C27-${(user?.uid ?? 'USER').slice(0, 6).toUpperCase()}-000000`;
   const date = formatDateShort(user?.lastAssessmentDate ?? isoNow());
