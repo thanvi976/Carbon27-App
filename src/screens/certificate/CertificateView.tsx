@@ -1,6 +1,8 @@
 import React, { forwardRef } from 'react';
 import { View, Text, ImageBackground } from 'react-native';
 
+import { formatCertificateDate, isoNow } from '../../utils/dateHelpers';
+
 export const CertificateView = forwardRef(({ data }: any, ref: any) => {
   const displayName = String(data?.name ?? 'User').trim() || 'User';
   const badgeLabel = data?.badge ?? data?.level ?? 'Eco';
@@ -105,13 +107,7 @@ export const CertificateView = forwardRef(({ data }: any, ref: any) => {
             color: 'rgb(198,223,222)',
           }}
         >
-          Issued on:{' '}
-          {data?.date ||
-            new Date().toLocaleDateString('en-GB', {
-              day: '2-digit',
-              month: 'short',
-              year: 'numeric',
-            })}
+          Issued on: {formatCertificateDate(String(data?.date ?? isoNow()))}
         </Text>
 
         <Text

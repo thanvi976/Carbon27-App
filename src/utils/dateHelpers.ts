@@ -7,6 +7,17 @@ export function formatDateShort(iso: string): string {
   return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: '2-digit' });
 }
 
+/** e.g. "March 17, 2026" — used on certificates */
+export function formatCertificateDate(isoOrParseable: string): string {
+  const d = new Date(isoOrParseable);
+  if (Number.isNaN(d.getTime())) return isoOrParseable;
+  return d.toLocaleDateString('en-US', {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+  });
+}
+
 export function hoursSince(iso: string): number {
   const then = new Date(iso).getTime();
   const now = Date.now();

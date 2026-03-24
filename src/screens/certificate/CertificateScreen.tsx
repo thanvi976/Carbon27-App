@@ -1,8 +1,6 @@
 import { useRef, useState } from 'react';
 import { ScrollView, Text, View, Alert } from 'react-native';
-import { Asset } from 'expo-asset';
 import * as FileSystem from 'expo-file-system/legacy';
-import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import { captureRef } from 'react-native-view-shot';
 
@@ -10,28 +8,8 @@ import { COLORS } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
-import { certificateHTML } from '../../utils/certificate';
-import type { LevelName } from '../../constants/levels';
 import { CertificateView } from './CertificateView';
-
-// ✅ CACHE background
-let cachedBg: string | null = null;
-
-async function getCertificateBgDataUrl() {
-  if (cachedBg) return cachedBg;
-
-  const asset = Asset.fromModule(require('../../../assets/certificate-bg.png'));
-  await asset.downloadAsync();
-
-  const uri = asset.localUri ?? asset.uri;
-
-  const base64 = await FileSystem.readAsStringAsync(uri, {
-    encoding: FileSystem.EncodingType.Base64,
-  });
-
-  cachedBg = `data:image/png;base64,${base64}`;
-  return cachedBg;
-}
+import { isoNow } from '../../utils/dateHelpers';
 
 export function CertificateScreen({ route }: any) {
   const params = route?.params || {};
@@ -40,82 +18,15 @@ export function CertificateScreen({ route }: any) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const createPdf = async () => {
+  const certId =
+    params?.certId ?? `C27-${Date.now().toString(36).toUpperCase()}`;
+
+  const date = params?.date ?? isoNow();
+
+  const capturecertificate = async (): Promise<string | null> => {
     try {
-      const bg = await getCertificateBgDataUrl();
-
-      const certId =
-        params?.certId ?? `C27-${Date.now().toString(36).toUpperCase()}`;
-      const date =
-        params?.date ?? new Date().toDateString();
-
-      const html = certificateHTML(
-        params?.name ?? 'User',
-        params?.score ?? 0,
-        (params?.level as LevelName) ?? 'Carbon Rookie',
-        certId,
-        date,
-        bg
-      );
-
-      const res = await Print.printToFileAsync({
-        html,
-        width: 1280,
-        height: 720,
-      });
-      return res.uri;
-    } catch (e: any) {
-      setError(e?.message ?? 'Failed to generate certificate');
-      return null;
-    }
-  };
-
-  // ✅ DOWNLOAD (actual save)
-  const handleDownload = async () => {
-    if (loading) return;
-    setLoading(true);
-    setError(null);
-  
-    try {
-      const uri = await createPdf();
-      if (!uri) return;
-  
-      // Ask user where to save
-      const permissions =
-        await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
-  
-      if (!permissions.granted) {
-        Alert.alert("Permission denied");
-        return;
-      }
-  
-      const base64 = await FileSystem.readAsStringAsync(uri, {
-        encoding: FileSystem.EncodingType.Base64,
-      });
-  
-      const newFileUri =
-        await FileSystem.StorageAccessFramework.createFileAsync(
-          permissions.directoryUri,
-          'carbon27-certificate.pdf',
-          'application/pdf'
-        );
-  
-      await FileSystem.writeAsStringAsync(newFileUri, base64, {
-        encoding: FileSystem.EncodingType.Base64,
-      });
-  
-      Alert.alert('Success', 'Certificate downloaded!');
-    } catch (e: any) {
-      setError(e?.message ?? 'Download failed');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleShare = async () => {
-    try {
-      // wait for hidden view to render
-      await new Promise<void>(res => setTimeout(() => res(), 300));
+      // Longer delay ensures Image fully renders on Android before capture
+      await new Promise<void>(res => setTimeout(() => res(), 800));
 
       const uri = await captureRef(certRef, {
         format: 'png',
@@ -125,22 +36,73 @@ export function CertificateScreen({ route }: any) {
         height: 720,
       });
 
-      await Sharing.shareAsync(uri);
-    } catch (err) {
-      console.log(err);
+      return uri;
+    } catch (e: any) {
+      console.error('Capture failed:', e);
+      setError(e?.message ?? 'Failed to capture certificate');
+      return null;
     }
   };
 
-  const certId =
-    params?.certId ?? `C27-${Date.now().toString(36).toUpperCase()}`;
+  const handleDownload = async () => {
+    if (loading) return;
+    setLoading(true);
+    setError(null);
 
-  const date =
-    params?.date ??
-    new Date().toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-    });
+    try {
+      const uri = await capturecertificate();
+      if (!uri) return;
+
+      const permissions =
+        await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
+
+      if (!permissions.granted) {
+        Alert.alert('Permission denied');
+        return;
+      }
+
+      const base64 = await FileSystem.readAsStringAsync(uri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+
+      const newFileUri =
+        await FileSystem.StorageAccessFramework.createFileAsync(
+          permissions.directoryUri,
+          'carbon27-certificate.png',
+          'image/png'
+        );
+
+      await FileSystem.writeAsStringAsync(newFileUri, base64, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+
+      Alert.alert('Success', 'Certificate saved!');
+    } catch (e: any) {
+      setError(e?.message ?? 'Download failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleShare = async () => {
+    if (loading) return;
+    setLoading(true);
+    setError(null);
+
+    try {
+      const uri = await capturecertificate();
+      if (!uri) return;
+
+      await Sharing.shareAsync(uri, {
+        mimeType: 'image/png',
+        dialogTitle: 'Share your Carbon27 Certificate',
+      });
+    } catch (e: any) {
+      setError(e?.message ?? 'Share failed');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <ScrollView
@@ -166,11 +128,9 @@ export function CertificateScreen({ route }: any) {
         <Text style={[TYPOGRAPHY.label, { color: COLORS.sage }]}>
           PREVIEW
         </Text>
-
         <View style={{ height: 10 }} />
-
         <Text style={[TYPOGRAPHY.body, { color: COLORS.textSecondary }]}>
-          Your certificate will be generated as a high-quality PDF.
+          Your certificate will be generated as a high-quality image.
         </Text>
       </Card>
 
@@ -202,7 +162,17 @@ export function CertificateScreen({ route }: any) {
         disabled={loading}
       />
 
-      <View style={{ position: 'absolute', top: -2000, left: 0 }}>
+      {/* Hidden certificate view — opacity:0 keeps it rendered but invisible */}
+      {/* Do NOT use top:-2000 as Android may skip rendering off-screen views */}
+      <View
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          opacity: 0,          // invisible but still rendered
+          pointerEvents: 'none',
+        }}
+      >
         <CertificateView
           ref={certRef}
           data={{

@@ -8,7 +8,7 @@ import { Card } from '../../components/ui/Card';
 import { useQuizStore } from '../../store/quizStore';
 import { scoreFromResponses, improvementTips } from '../../utils/scoring';
 import { useAuthStore } from '../../store/authStore';
-import { isoNow, formatDateShort } from '../../utils/dateHelpers';
+import { isoNow } from '../../utils/dateHelpers';
 import { recordAssessment, upsertUser } from '../../services/firestore';
 import { linkedInShareText } from '../../utils/shareText';
 import { useStreakStore } from '../../store/streakStore';
@@ -99,7 +99,7 @@ export function ResultScreen(props: any) {
   }, []);
 
   const certId = user?.certificateId ?? `C27-${(user?.uid ?? 'USER').slice(0, 6).toUpperCase()}-000000`;
-  const date = formatDateShort(user?.lastAssessmentDate ?? isoNow());
+  const date = user?.lastAssessmentDate ?? isoNow();
 
   return (
     <View style={{ flex: 1, backgroundColor: COLORS.bgPrimary, padding: 20 }}>
