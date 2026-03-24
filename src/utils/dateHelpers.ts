@@ -35,3 +35,30 @@ export function daysInMonth(year: number, monthIndex0: number): number {
   return new Date(year, monthIndex0 + 1, 0).getDate();
 }
 
+/** Start-of-day in local timezone. */
+function startOfLocalDay(d: Date): number {
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+}
+
+/** Whole calendar days between two instants (local dates). */
+export function calendarDaysBetween(isoEarlier: string, isoLater: string): number {
+  const a = startOfLocalDay(new Date(isoEarlier));
+  const b = startOfLocalDay(new Date(isoLater));
+  return Math.round((b - a) / 86400000);
+}
+
+export function isSameCalendarDay(iso: string, ref: Date = new Date()): boolean {
+  const d = new Date(iso);
+  return (
+    d.getFullYear() === ref.getFullYear() &&
+    d.getMonth() === ref.getMonth() &&
+    d.getDate() === ref.getDate()
+  );
+}
+
+export function isYesterdayCalendar(iso: string, ref: Date = new Date()): boolean {
+  const y = new Date(ref.getFullYear(), ref.getMonth(), ref.getDate() - 1);
+  const d = new Date(iso);
+  return d.getFullYear() === y.getFullYear() && d.getMonth() === y.getMonth() && d.getDate() === y.getDate();
+}
+

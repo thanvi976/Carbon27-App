@@ -13,3 +13,17 @@ export function scoreToLevel(score: number): LevelName {
   return 'Carbon Rookie';
 }
 
+/** Level label from numeric sustainability score (0–100). */
+export function getLevel(score: number): LevelName {
+  return scoreToLevel(score);
+}
+
+/** Sustainability badge title derived from score tier (for profile/certificate UI). */
+export function getBadge(score: number): string {
+  if (score >= 81) return 'Planet Hero';
+  if (score >= 61) return 'Green Champion';
+  if (score >= 41) return 'Eco Learner';
+  if (score >= 21) return 'Climate Explorer';
+  return 'Carbon Rookie';
+}
+

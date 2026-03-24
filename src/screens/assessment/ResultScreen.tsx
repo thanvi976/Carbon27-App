@@ -1,70 +1,95 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { Animated, Share, Text, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { Animated, ScrollView, Share, Text, View } from 'react-native';
 import { COLORS } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 import { Button } from '../../components/ui/Button';
-import { Badge } from '../../components/ui/Badge';
 import { Card } from '../../components/ui/Card';
 import { useQuizStore } from '../../store/quizStore';
-import { scoreFromResponses, improvementTips } from '../../utils/scoring';
+import { scoreFromResponses } from '../../utils/scoring';
 import { useAuthStore } from '../../store/authStore';
 import { isoNow } from '../../utils/dateHelpers';
 import { recordAssessment, upsertUser } from '../../services/firestore';
-import { linkedInShareText } from '../../utils/shareText';
-import { useStreakStore } from '../../store/streakStore';
+import { getBadge, getLevel } from '../../constants/levels';
+import { AppHeader } from '../../components/layout/AppHeader';
+import { getStackNavigator } from '../../navigation/navigateRoot';
+import { useNavigation } from '@react-navigation/native';
+
+const TIPS: string[] = [
+  'Use public transportation or carpool whenever possible',
+  'Reduce meat consumption and opt for plant-based meals',
+  'Switch to renewable energy sources for your home',
+  'Minimize single-use plastics and use reusable alternatives',
+  'Support local and sustainable brands',
+  'Reduce water usage with shorter showers and efficient appliances',
+];
+
 export function ResultScreen(props: any) {
-  const { navigation } = props;
+  const { navigation, route } = props;
+  const nav = useNavigation();
+  const stackNav = getStackNavigator(nav as any);
   const { responses, resetQuiz } = useQuizStore();
   const user = useAuthStore((s) => s.user);
   const setUser = useAuthStore((s) => s.setUser);
-  const checkIn = useStreakStore((s) => s.checkIn);
   const [error, setError] = useState<string | null>(null);
   const [offline, setOffline] = useState(false);
-  const [saving, setSaving] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [displayScore, setDisplayScore] = useState(0);
   const responsesSnapshot = useRef(responses).current;
+  const hasFreshQuiz = Object.keys(responsesSnapshot).length > 0;
 
-  const { score, level, badges } = useMemo(() => scoreFromResponses(responsesSnapshot), [responsesSnapshot]);
-  const tips = useMemo(() => improvementTips(responsesSnapshot), [responsesSnapshot]);
+  const fromQuiz = hasFreshQuiz ? scoreFromResponses(responsesSnapshot) : null;
+
+  const routeScore = route?.params?.score as number | undefined;
+  const effectiveScore =
+    typeof routeScore === 'number'
+      ? routeScore
+      : fromQuiz?.score ?? user?.score ?? 0;
+
+  const level = getLevel(effectiveScore);
+  const badgeLabel = getBadge(effectiveScore);
 
   const anim = useRef(new Animated.Value(0)).current;
-  const particles = useRef(Array.from({ length: 12 }, () => new Animated.Value(0))).current;
+  const particles = useRef(Array.from({ length: 16 }, () => new Animated.Value(0))).current;
+  const [showConfetti, setShowConfetti] = useState(true);
 
   useEffect(() => {
     const id = anim.addListener(({ value }) => setDisplayScore(Math.round(value)));
-    Animated.timing(anim, { toValue: score, duration: 1500, useNativeDriver: false }).start();
+    Animated.timing(anim, { toValue: effectiveScore, duration: 1500, useNativeDriver: false }).start();
     particles.forEach((p, idx) => {
-      Animated.loop(
-        Animated.sequence([
-          Animated.delay(200 * idx),
-          Animated.timing(p, { toValue: 1, duration: 2200, useNativeDriver: true }),
-          Animated.timing(p, { toValue: 0, duration: 0, useNativeDriver: true }),
-        ])
-      ).start();
+      Animated.timing(p, {
+        toValue: 1,
+        duration: 1800,
+        delay: idx * 50,
+        useNativeDriver: true,
+      }).start();
     });
+    const t = setTimeout(() => setShowConfetti(false), 5000);
     return () => {
       anim.removeListener(id);
+      clearTimeout(t);
     };
-  }, [anim, particles, score]);
+  }, [anim, particles, effectiveScore]);
 
   useEffect(() => {
+    if (!hasFreshQuiz) return;
     let mounted = true;
     (async () => {
       setSaving(true);
       setError(null);
       setOffline(false);
       try {
-        checkIn(); // streak increments on assessment complete
         if (!user) throw new Error('Not signed in');
+        const { score, level: lv, badges } = scoreFromResponses(responsesSnapshot);
         const now = isoNow();
-        const certId = user.certificateId ?? `C27-${user.uid.slice(0, 6).toUpperCase()}-${Date.now().toString().slice(-6)}`;
+        const certId =
+          user.certificateId ?? `C27-${user.uid.slice(0, 6).toUpperCase()}-${Date.now().toString().slice(-6)}`;
         const history = [...(user.scoreHistory ?? []), { date: now, score }].slice(-40);
         const next = {
           ...user,
           score,
-          level,
+          level: lv,
           badges,
-          responses,
+          responses: responsesSnapshot,
           lastAssessmentDate: now,
           certificateId: certId,
           scoreHistory: history,
@@ -73,7 +98,7 @@ export function ResultScreen(props: any) {
 
         await upsertUser(user.uid, {
           score,
-          level,
+          level: lv,
           badges,
           responses: responsesSnapshot,
           lastAssessmentDate: now,
@@ -82,8 +107,9 @@ export function ResultScreen(props: any) {
           streakCount: user.streakCount,
           bestStreak: user.bestStreak,
           lastCheckIn: user.lastCheckIn,
+          streaks: user.streaks ?? [],
         });
-        await recordAssessment({ uid: user.uid, score, level, badges, responses: responsesSnapshot });
+        await recordAssessment({ uid: user.uid, score, level: lv, badges, responses: responsesSnapshot });
       } catch (e: any) {
         setOffline(true);
         setError(e?.message ?? 'Could not sync. Showing cached result.');
@@ -96,92 +122,117 @@ export function ResultScreen(props: any) {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [hasFreshQuiz]);
 
-  const certId = user?.certificateId ?? `C27-${(user?.uid ?? 'USER').slice(0, 6).toUpperCase()}-000000`;
-  const date = user?.lastAssessmentDate ?? isoNow();
+  const certId =
+    user?.certificateId ?? `C27-${(user?.uid ?? 'USER').slice(0, 6).toUpperCase()}-000000`;
+  const userName = user?.name ?? 'Member';
+
+  const shareSummary = async () => {
+    const msg = `Carbon27 — My carbon score: ${effectiveScore}/100. Level: ${level}. Badge: ${badgeLabel}. Track yours at carbon27.ai`;
+    try {
+      await Share.share({ message: msg });
+    } catch {
+      /* user dismissed */
+    }
+  };
 
   return (
-    <View style={{ flex: 1, backgroundColor: COLORS.bgPrimary, padding: 20 }}>
-      <View style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 }}>
-        {particles.map((p, i) => {
-          const x = (i * 27) % 320;
-          const y = (i * 53) % 680;
-          return (
-            <Animated.View
-              key={i}
-              style={{
-                position: 'absolute',
-                left: x,
-                top: y,
-                width: 2,
-                height: 2,
-                borderRadius: 999,
-                backgroundColor: COLORS.gold,
-                opacity: 0.6,
-                transform: [
-                  {
-                    translateY: p.interpolate({ inputRange: [0, 1], outputRange: [0, 50] }),
-                  },
-                ],
-              }}
-            />
-          );
-        })}
-      </View>
+    <View style={{ flex: 1, backgroundColor: COLORS.bgPrimary }}>
+      <AppHeader />
+      {showConfetti ? (
+        <View pointerEvents="none" style={{ position: 'absolute', left: 0, right: 0, top: 56, bottom: 0, zIndex: 5 }}>
+          {particles.map((p, i) => {
+            const x = (i * 29) % 340;
+            const y = (i * 47) % 620;
+            return (
+              <Animated.View
+                key={i}
+                style={{
+                  position: 'absolute',
+                  left: x,
+                  top: y,
+                  width: 3,
+                  height: 3,
+                  borderRadius: 2,
+                  backgroundColor: COLORS.gold,
+                  opacity: 0.65,
+                  transform: [
+                    {
+                      translateY: p.interpolate({ inputRange: [0, 1], outputRange: [0, 80 + (i % 4) * 12] }),
+                    },
+                  ],
+                }}
+              />
+            );
+          })}
+        </View>
+      ) : null}
 
-      <View style={{ alignItems: 'center', marginTop: 26 }}>
-        <Text style={[TYPOGRAPHY.score, { color: COLORS.gold }]}>{displayScore}</Text>
-        <Text style={[TYPOGRAPHY.label, { color: COLORS.textMuted, marginTop: 6 }]}>{String(level).toUpperCase()}</Text>
-      </View>
+      <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 32 }}>
+        <View style={{ alignItems: 'center', marginTop: 12 }}>
+          <Text style={[TYPOGRAPHY.score, { color: COLORS.gold }]}>{displayScore}</Text>
+          <Text style={[TYPOGRAPHY.label, { color: COLORS.textMuted, marginTop: 6 }]}>{String(level).toUpperCase()}</Text>
+        </View>
 
-      {saving ? <Text style={[TYPOGRAPHY.body, { color: COLORS.textMuted, marginTop: 10 }]}>Saving…</Text> : null}
-      {error ? <Text style={[TYPOGRAPHY.body, { color: COLORS.error, marginTop: 10 }]}>{error}</Text> : null}
-      {offline ? <Text style={[TYPOGRAPHY.body, { color: COLORS.textMuted, marginTop: 6 }]}>Offline mode.</Text> : null}
+        {saving ? <Text style={[TYPOGRAPHY.body, { color: COLORS.textMuted, marginTop: 10 }]}>Saving…</Text> : null}
+        {error ? <Text style={[TYPOGRAPHY.body, { color: COLORS.error, marginTop: 10 }]}>{error}</Text> : null}
+        {offline ? <Text style={[TYPOGRAPHY.body, { color: COLORS.textMuted, marginTop: 6 }]}>Offline mode.</Text> : null}
 
-      <View style={{ height: 18 }} />
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, justifyContent: 'center' }}>
-        {badges.map((b) => (
-          <Badge key={b} label={b.replace(/_/g, ' ')} tone="gold" />
-        ))}
-        {badges.length === 0 ? <Badge label="no badges yet" /> : null}
-      </View>
+        <View style={{ height: 18 }} />
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
+          <Card style={{ flex: 1, minWidth: '28%' }}>
+            <Text style={[TYPOGRAPHY.label, { color: COLORS.sage }]}>CARBON SCORE</Text>
+            <Text style={[TYPOGRAPHY.score, { color: COLORS.textPrimary, fontSize: 36, marginTop: 6 }]}>
+              {effectiveScore}
+            </Text>
+          </Card>
+          <Card style={{ flex: 1, minWidth: '28%' }}>
+            <Text style={[TYPOGRAPHY.label, { color: COLORS.sage }]}>BADGE</Text>
+            <Text style={[TYPOGRAPHY.body, { color: COLORS.textPrimary, marginTop: 8 }]} numberOfLines={3}>
+              {badgeLabel}
+            </Text>
+          </Card>
+          <Card style={{ flex: 1, minWidth: '28%' }}>
+            <Text style={[TYPOGRAPHY.label, { color: COLORS.sage }]}>LEVEL</Text>
+            <Text style={[TYPOGRAPHY.body, { color: COLORS.textPrimary, marginTop: 8 }]}>{level}</Text>
+          </Card>
+        </View>
 
-      <View style={{ height: 18 }} />
-      <Card style={{ borderLeftWidth: 3, borderLeftColor: COLORS.sage }}>
-        <Text style={[TYPOGRAPHY.label, { color: COLORS.sage }]}>TOP IMPROVEMENTS</Text>
-        <View style={{ height: 10 }} />
-        {tips.map((t, idx) => (
-          <Text key={idx} style={[TYPOGRAPHY.body, { color: COLORS.textSecondary, marginBottom: idx === 2 ? 0 : 10 }]}>
-            {t}
-          </Text>
-        ))}
-      </Card>
+        <View style={{ height: 22 }} />
+        <Card style={{ borderLeftWidth: 3, borderLeftColor: COLORS.sage }}>
+          <Text style={[TYPOGRAPHY.label, { color: COLORS.sage }]}>TIPS TO IMPROVE</Text>
+          <View style={{ height: 12 }} />
+          {TIPS.map((t, idx) => (
+            <Text key={idx} style={[TYPOGRAPHY.body, { color: COLORS.textSecondary, marginBottom: idx === TIPS.length - 1 ? 0 : 10 }]}>
+              {idx + 1}. {t}
+            </Text>
+          ))}
+        </Card>
 
-      <View style={{ flex: 1 }} />
-      <Button
-        title="DOWNLOAD CERTIFICATE"
-        onPress={() =>
-          navigation.navigate('Certificate', {
-            certId,
-            name: user?.name ?? 'Member',
-            score,
-            level,
-            date,
-          } as any)
-        }
-      />
-      <View style={{ height: 12 }} />
-      <Button
-        title="Share on LinkedIn"
-        variant="secondary"
-        onPress={async () => {
-          try {
-            await Share.share({ message: linkedInShareText(score, level) });
-          } catch {}
-        }}
-      />
+        <View style={{ height: 24 }} />
+        <Button
+          title="Download Certificate"
+          onPress={() =>
+            navigation.navigate('Certificate', {
+              certId,
+              name: userName,
+              score: effectiveScore,
+              level,
+              badge: badgeLabel,
+              date: isoNow(),
+            } as any)
+          }
+        />
+        <View style={{ height: 12 }} />
+        <Button title="Share Results" variant="secondary" onPress={shareSummary} />
+        <View style={{ height: 12 }} />
+        <Button
+          title="Go to Dashboard"
+          variant="secondary"
+          onPress={() => stackNav.navigate('Main', { screen: 'DashboardTab' } as never)}
+        />
+      </ScrollView>
     </View>
   );
 }
-

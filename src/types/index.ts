@@ -29,6 +29,15 @@ export type BadgeId =
 export type QuestionOption = { label: string; value: number };
 export type Question = { id: QuestionId; text: string; options: QuestionOption[] };
 
+/** Per-activity streak row (mirrors website streak model). */
+export type UserStreak = {
+  id: string;
+  activityName: string;
+  currentStreak: number;
+  longestStreak: number;
+  lastLoggedDate: string | null;
+};
+
 export type CarbonUser = {
   uid: string;
   name: string;
@@ -45,6 +54,8 @@ export type CarbonUser = {
   scoreHistory: { date: string; score: number }[];
   certificateId: string | null;
   orgId: string | null;
+  /** Activity streaks; defaults to [] when missing from storage. */
+  streaks?: UserStreak[];
   createdAt?: string;
 };
 

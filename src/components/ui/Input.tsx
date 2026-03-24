@@ -1,4 +1,4 @@
-import { TextInput, View, Text, ViewStyle } from 'react-native';
+import { TextInput, View, Text, ViewStyle, type TextInputProps } from 'react-native';
 import { COLORS } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 
@@ -17,7 +17,7 @@ export function Input({
   onChangeText: (t: string) => void;
   placeholder?: string;
   secureTextEntry?: boolean;
-  keyboardType?: 'default' | 'email-address';
+  keyboardType?: TextInputProps['keyboardType'];
   autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
   style?: ViewStyle;
 }) {

@@ -169,7 +169,7 @@ export function CertificateScreen({ route }: any) {
           position: 'absolute',
           top: 0,
           left: 0,
-          opacity: 0,          // invisible but still rendered
+          opacity: 0.01,          // invisible but still rendered
           pointerEvents: 'none',
         }}
       >

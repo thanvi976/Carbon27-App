@@ -35,7 +35,7 @@ export function LoginScreen(props: any) {
     try {
       await loginEmailPassword(values.email, values.password);
       // With mock auth (no Firebase Auth), route directly.
-      navigation.replace('Home' as any);
+      navigation.replace('Main' as never);
     } catch (e: any) {
       setError(e?.message ?? 'Login failed. Please try again.');
     } finally {

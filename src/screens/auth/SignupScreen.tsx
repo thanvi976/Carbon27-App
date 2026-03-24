@@ -53,9 +53,10 @@ export function SignupScreen(props: any) {
         scoreHistory: [],
         certificateId: null,
         orgId: null,
+        streaks: [],
       });
       // With mock auth (no Firebase Auth), route directly.
-      navigation.replace('Home' as any);
+      navigation.replace('Main' as never);
     } catch (e: any) {
       setError(e?.message ?? 'Signup failed. Please try again.');
     } finally {
