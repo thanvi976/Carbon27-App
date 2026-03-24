@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { ScrollView, Text, View, Alert } from 'react-native';
 import { Asset } from 'expo-asset';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
+import { captureRef } from 'react-native-view-shot';
 
 import { COLORS } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
@@ -11,6 +12,7 @@ import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { certificateHTML } from '../../utils/certificate';
 import type { LevelName } from '../../constants/levels';
+import { CertificateView } from './CertificateView';
 
 // ✅ CACHE background
 let cachedBg: string | null = null;
@@ -33,6 +35,7 @@ async function getCertificateBgDataUrl() {
 
 export function CertificateScreen({ route }: any) {
   const params = route?.params || {};
+  const certRef = useRef<any>(null);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -109,27 +112,35 @@ export function CertificateScreen({ route }: any) {
     }
   };
 
-  // ✅ SHARE
   const handleShare = async () => {
-    if (loading) return;
-    setLoading(true);
-    setError(null);
-
     try {
-      const uri = await createPdf();
-      if (!uri) return;
+      // wait for hidden view to render
+      await new Promise<void>(res => setTimeout(() => res(), 300));
 
-      if (await Sharing.isAvailableAsync()) {
-        await Sharing.shareAsync(uri);
-      } else {
-        Alert.alert('Error', 'Sharing not available');
-      }
-    } catch (e: any) {
-      setError(e?.message ?? 'Share failed');
-    } finally {
-      setLoading(false);
+      const uri = await captureRef(certRef, {
+        format: 'png',
+        quality: 1,
+        result: 'tmpfile',
+        width: 1280,
+        height: 720,
+      });
+
+      await Sharing.shareAsync(uri);
+    } catch (err) {
+      console.log(err);
     }
   };
+
+  const certId =
+    params?.certId ?? `C27-${Date.now().toString(36).toUpperCase()}`;
+
+  const date =
+    params?.date ??
+    new Date().toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    });
 
   return (
     <ScrollView
@@ -190,6 +201,17 @@ export function CertificateScreen({ route }: any) {
         onPress={handleShare}
         disabled={loading}
       />
+
+      <View style={{ position: 'absolute', top: -2000, left: 0 }}>
+        <CertificateView
+          ref={certRef}
+          data={{
+            ...params,
+            certId,
+            date,
+          }}
+        />
+      </View>
     </ScrollView>
   );
 }
