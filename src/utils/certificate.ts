@@ -18,7 +18,9 @@ export function certificateHTML(
 <head>
   <meta charset="utf-8"/>
   <style>
-    @page { margin: 0; }
+    @page { 
+    size: 1280px 720px;
+    margin: 0; }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
