@@ -4,7 +4,7 @@ import { screenStyles } from '../_shared/styles';
 import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
 import { useAuthStore } from '../../store/authStore';
-import { upsertUser } from '../../services/firestore';
+import { upsertUser } from '../../services/db';
 export function EmailCaptureScreen(props: any) {
   const { navigation } = props;
   const user = useAuthStore((s) => s.user);

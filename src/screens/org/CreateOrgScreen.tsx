@@ -6,7 +6,7 @@ import { COLORS } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
-import { createOrganisation, getOrganisation, upsertUser } from '../../services/firestore';
+import { createOrganisation, getOrganisation, upsertUser } from '../../services/db';
 import { useAuthStore } from '../../store/authStore';
 import { useOrgStore } from '../../store/orgStore';
 

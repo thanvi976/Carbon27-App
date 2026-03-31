@@ -8,7 +8,7 @@ import { useQuizStore } from '../../store/quizStore';
 import { scoreFromResponses } from '../../utils/scoring';
 import { useAuthStore } from '../../store/authStore';
 import { isoNow } from '../../utils/dateHelpers';
-import { recordAssessment, upsertUser } from '../../services/firestore';
+import { recordAssessment, upsertUser } from '../../services/db';
 import { getBadge, getLevel } from '../../constants/levels';
 import { AppHeader } from '../../components/layout/AppHeader';
 import { getStackNavigator } from '../../navigation/navigateRoot';

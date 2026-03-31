@@ -10,7 +10,7 @@ import { Input } from '../../components/ui/Input';
 import { AppHeader } from '../../components/layout/AppHeader';
 import { getBadge, getLevel } from '../../constants/levels';
 import { normalizeCarbonUser } from '../../utils/userHelpers';
-import { upsertUser } from '../../services/firestore';
+import { upsertUser } from '../../services/db';
 import { logoutUser } from '../../services/auth';
 import { getStackNavigator } from '../../navigation/navigateRoot';
 

@@ -8,7 +8,7 @@ import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { useAuthStore } from '../../store/authStore';
 import { useOrgStore } from '../../store/orgStore';
-import { getOrganisation, getOrganisationLeaderboard } from '../../services/firestore';
+import { getOrganisation, getOrganisationLeaderboard } from '../../services/db';
 
 type Props = NativeStackScreenProps<OrgStackParamList, 'OrgDashboard'>;
 

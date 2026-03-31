@@ -8,7 +8,7 @@ import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
 import { COLORS } from '../../constants/colors';
 import { signupEmailPassword } from '../../services/auth';
-import { upsertUser } from '../../services/firestore';
+import { upsertUser } from '../../services/db';
 
 const schema = z.object({
   name: z.string().min(2),
