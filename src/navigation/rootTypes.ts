@@ -28,4 +28,5 @@ export type RootStackParamList = {
       }
     | undefined;
   OrgCalculator: undefined;
+  CarbonRunner: undefined;
 };

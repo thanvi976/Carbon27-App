@@ -13,6 +13,7 @@ import { EmailCaptureScreen } from './src/screens/assessment/EmailCaptureScreen'
 import { ResultScreen } from './src/screens/assessment/ResultScreen';
 import { CertificateScreen } from './src/screens/certificate/CertificateScreen';
 import { OrgCalculatorScreen } from './src/screens/org/OrgCalculatorScreen';
+import { CarbonRunnerScreen } from './src/screens/game/CarbonRunnerScreen';
 import { withAppHeader } from './src/components/layout/withAppHeader';
 import type { RootStackParamList } from './src/navigation/rootTypes';
 
@@ -38,6 +39,7 @@ export default function App() {
         <Stack.Screen name="Result" component={ResultScreen} />
         <Stack.Screen name="Certificate" component={CertificateWrapped} />
         <Stack.Screen name="OrgCalculator" component={OrgCalculatorScreen} />
+        <Stack.Screen name="CarbonRunner" component={CarbonRunnerScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

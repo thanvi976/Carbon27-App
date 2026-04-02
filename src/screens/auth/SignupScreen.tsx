@@ -8,7 +8,6 @@ import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
 import { COLORS } from '../../constants/colors';
 import { signupEmailPassword } from '../../services/auth';
-import { upsertUser } from '../../services/db';
 
 const schema = z.object({
   name: z.string().min(2),
@@ -36,26 +35,7 @@ export function SignupScreen(props: any) {
     setError(null);
     setLoading(true);
     try {
-      const user = await signupEmailPassword(values.name, values.email, values.password);
-      // Pre-create Firestore user record so downstream reads succeed even on first boot.
-      await upsertUser(user.uid, {
-        uid: user.uid,
-        name: values.name.trim(),
-        email: values.email.trim(),
-        score: 0,
-        level: 'Carbon Rookie',
-        badges: [],
-        responses: {},
-        streakCount: 0,
-        bestStreak: 0,
-        lastCheckIn: null,
-        lastAssessmentDate: null,
-        scoreHistory: [],
-        certificateId: null,
-        orgId: null,
-        streaks: [],
-      });
-      // With mock auth (no Firebase Auth), route directly.
+      await signupEmailPassword(values.name, values.email, values.password);
       navigation.replace('Main' as never);
     } catch (e: any) {
       setError(e?.message ?? 'Signup failed. Please try again.');
@@ -107,4 +87,3 @@ export function SignupScreen(props: any) {
     </KeyboardAvoidingView>
   );
 }
-
