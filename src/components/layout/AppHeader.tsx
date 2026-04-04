@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Modal, Pressable, Text, View, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { COLORS } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 import type { NavigationProp, ParamListBase } from '@react-navigation/native';
@@ -25,6 +26,7 @@ export function AppHeader() {
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
   const [open, setOpen] = useState(false);
   const root = stackNav(navigation);
+  const insets = useSafeAreaInsets();
 
   return (
     <>
@@ -34,7 +36,8 @@ export function AppHeader() {
           alignItems: 'center',
           justifyContent: 'space-between',
           paddingHorizontal: 20,
-          paddingVertical: 14,
+          paddingTop: insets.top + 10,
+          paddingBottom: 14,
           backgroundColor: COLORS.bgPrimary,
           borderBottomWidth: 0.5,
           borderBottomColor: COLORS.border,

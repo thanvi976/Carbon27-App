@@ -155,7 +155,7 @@ export function ProfileScreen() {
               }}
             >
               <Text style={[TYPOGRAPHY.body, { color: COLORS.textPrimary }]}>{item.label}</Text>
-              <Text style={{ color: COLORS.textMuted, fontSize: 18 }}>›</Text>
+              <Text style={{ color: COLORS.textMuted, fontSize: 18 }}>→</Text>
             </TouchableOpacity>
           ))}
         </View>

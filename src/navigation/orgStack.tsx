@@ -25,8 +25,8 @@ export function OrgStackNavigator() {
                 headerTintColor: COLORS.gold,
                 headerLeft: navigation.canGoBack()
                   ? () => (
-                      <TouchableOpacity onPress={() => navigation.goBack()} style={{ paddingLeft: 8 }}>
-                        <Text style={{ color: COLORS.gold, fontSize: 28, lineHeight: 32 }}>‹</Text>
+                      <TouchableOpacity onPress={() => navigation.goBack()} style={{ paddingLeft: 8, paddingRight: 4 }}>
+                        <Text style={{ color: COLORS.gold, fontSize: 22, lineHeight: 28 }}>←</Text>
                       </TouchableOpacity>
                     )
                   : undefined,
