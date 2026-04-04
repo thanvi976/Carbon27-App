@@ -84,6 +84,27 @@ export function SignupScreen(props: any) {
       setOtp(next);
       return;
     }
+
+    // Handle paste or autofill — multiple digits at once
+    if (digits.length > 1) {
+      const next = [...otp];
+      let filled = 0;
+      for (let i = index; i < OTP_LENGTH && filled < digits.length; i++, filled++) {
+        next[i] = digits[filled];
+      }
+      setOtp(next);
+      // Focus the last filled box or the last box
+      const lastFilled = Math.min(index + digits.length - 1, OTP_LENGTH - 1);
+      otpRefs.current[lastFilled]?.focus();
+      // Auto verify if all filled
+      const code = next.join('');
+      if (code.length === OTP_LENGTH && !next.includes('')) {
+        setTimeout(() => void runVerifyOtp(code), 0);
+      }
+      return;
+    }
+
+    // Single digit — existing behaviour
     const digit = digits.slice(-1);
     const next = [...otp];
     next[index] = digit;
@@ -93,9 +114,7 @@ export function SignupScreen(props: any) {
     } else {
       const code = next.join('');
       if (code.length === OTP_LENGTH) {
-        setTimeout(() => {
-          void runVerifyOtp(code);
-        }, 0);
+        setTimeout(() => void runVerifyOtp(code), 0);
       }
     }
   };
@@ -356,7 +375,7 @@ export function SignupScreen(props: any) {
             onChangeText={(t) => onOtpChange(index, t)}
             onKeyPress={({ nativeEvent }) => onOtpKeyPress(index, nativeEvent.key)}
             keyboardType="number-pad"
-            maxLength={1}
+            maxLength={index === 0 ? OTP_LENGTH : 1}
             selectTextOnFocus
             editable={!loading}
             style={[
