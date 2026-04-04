@@ -44,24 +44,24 @@ export function MainTabNavigator() {
         options={{ tabBarLabel: 'Home', tabBarIcon: ({ color }) => <TabIcon name="home" color={color} /> }}
       />
       <Tab.Screen
-        name="DashboardTab"
-        component={DashboardScreen}
-        options={{ tabBarLabel: 'Dashboard', tabBarIcon: ({ color }) => <TabIcon name="grid" color={color} /> }}
-      />
-      <Tab.Screen
         name="StreaksTab"
         component={StreaksScreen}
         options={{ tabBarLabel: 'Streaks', tabBarIcon: ({ color }) => <TabIcon name="flame" color={color} /> }}
       />
       <Tab.Screen
-        name="ProfileTab"
-        component={ProfileScreen}
-        options={{ tabBarLabel: 'Profile', tabBarIcon: ({ color }) => <TabIcon name="user" color={color} /> }}
+        name="DashboardTab"
+        component={DashboardScreen}
+        options={{ tabBarLabel: 'Dashboard', tabBarIcon: ({ color }) => <TabIcon name="grid" color={color} /> }}
       />
       <Tab.Screen
         name="OrgTab"
         component={OrgStackNavigator}
         options={{ tabBarLabel: 'Org', tabBarIcon: ({ color }) => <TabIcon name="org" color={color} /> }}
+      />
+      <Tab.Screen
+        name="ProfileTab"
+        component={ProfileScreen}
+        options={{ tabBarLabel: 'Profile', tabBarIcon: ({ color }) => <TabIcon name="user" color={color} /> }}
       />
     </Tab.Navigator>
   );

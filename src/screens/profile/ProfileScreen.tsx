@@ -134,6 +134,32 @@ export function ProfileScreen() {
           )}
         </Card>
 
+        <View style={{ marginBottom: 16 }}>
+          <Text style={[TYPOGRAPHY.label, { color: COLORS.textMuted, marginBottom: 12 }]}>INFO</Text>
+          {[
+            { label: 'About Us', screen: 'About' },
+            { label: 'Contact', screen: 'Contact' },
+            { label: 'Privacy Policy', screen: 'PrivacyPolicy' },
+            { label: 'Terms of Service', screen: 'Terms' },
+          ].map((item) => (
+            <TouchableOpacity
+              key={item.label}
+              onPress={() => navigation.navigate(item.screen as never)}
+              style={{
+                paddingVertical: 14,
+                borderBottomWidth: 0.5,
+                borderBottomColor: COLORS.border,
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
+              <Text style={[TYPOGRAPHY.body, { color: COLORS.textPrimary }]}>{item.label}</Text>
+              <Text style={{ color: COLORS.textMuted, fontSize: 18 }}>›</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
         <View style={{ height: 22 }} />
         <Button
           title="LOG OUT"
@@ -143,6 +169,24 @@ export function ProfileScreen() {
               await logoutUser();
             } finally {
               setUser(null);
+              let current: unknown = navigation;
+              while (current) {
+                const nav = current as {
+                  getState?: () => { routeNames?: string[] };
+                  getParent?: () => unknown;
+                  reset: (state: { index: number; routes: { name: 'Login' }[] }) => void;
+                };
+                const routeNames = nav.getState?.()?.routeNames;
+                if (routeNames?.includes('Login')) {
+                  nav.reset({ index: 0, routes: [{ name: 'Login' }] });
+                  return;
+                }
+                current = nav.getParent?.();
+              }
+              navigation.reset({
+                index: 0,
+                routes: [{ name: 'Login' as never }],
+              });
             }
           }}
         />

@@ -46,14 +46,14 @@ export function TabNavigator() {
         options={{ tabBarLabel: 'Streaks', tabBarIcon: ({ color }) => <TabIcon name="flame" color={color} /> }}
       />
       <Tab.Screen
-        name="ProfileTab"
-        component={ProfileScreen}
-        options={{ tabBarLabel: 'Profile', tabBarIcon: ({ color }) => <TabIcon name="user" color={color} /> }}
-      />
-      <Tab.Screen
         name="OrgTab"
         component={OrgStackNavigator}
         options={{ tabBarLabel: 'Org', tabBarIcon: ({ color }) => <TabIcon name="org" color={color} /> }}
+      />
+      <Tab.Screen
+        name="ProfileTab"
+        component={ProfileScreen}
+        options={{ tabBarLabel: 'Profile', tabBarIcon: ({ color }) => <TabIcon name="user" color={color} /> }}
       />
     </Tab.Navigator>
   );

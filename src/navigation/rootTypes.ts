@@ -2,10 +2,10 @@ import type { NavigatorScreenParams } from '@react-navigation/native';
 
 export type MainTabParamList = {
   HomeTab: undefined;
-  DashboardTab: undefined;
   StreaksTab: undefined;
-  ProfileTab: undefined;
+  DashboardTab: undefined;
   OrgTab: undefined;
+  ProfileTab: undefined;
 };
 
 export type RootStackParamList = {
@@ -29,4 +29,8 @@ export type RootStackParamList = {
       }
     | undefined;
   CarbonRunner: undefined;
+  About: undefined;
+  Contact: undefined;
+  PrivacyPolicy: undefined;
+  Terms: undefined;
 };

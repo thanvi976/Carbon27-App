@@ -32,7 +32,7 @@ export type OrgStackParamList = {
 export type TabParamList = {
   HomeTab: undefined;
   StreaksTab: undefined;
-  ProfileTab: undefined;
   OrgTab: undefined;
+  ProfileTab: undefined;
 };
 
