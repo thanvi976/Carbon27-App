@@ -3,6 +3,17 @@ import { useAuthStore } from '../store/authStore'
 import { getUser, upsertUser } from './db'
 import type { CarbonUser } from '../types'
 
+export type SignupExtraData = {
+  account_type: 'personal' | 'organization'
+  organization_name?: string | null
+  organization_address?: string | null
+  organization_email?: string | null
+  organization_size?: string | null
+  contact_name?: string | null
+  contact_email?: string | null
+  contact_phone?: string | null
+}
+
 export async function loginEmailPassword(email: string, password: string) {
   const { data, error } = await supabase.auth.signInWithPassword({ email, password })
   if (error) throw new Error(error.message)
@@ -34,38 +45,58 @@ export async function loginEmailPassword(email: string, password: string) {
   return data
 }
 
-export async function signupEmailPassword(name: string, email: string, password: string) {
-  const { data, error } = await supabase.auth.signUp({
+export async function sendOtp(email: string) {
+  const { error } = await supabase.auth.signInWithOtp({
     email,
-    password,
-    options: { data: { name } },
+    options: { shouldCreateUser: true },
   })
   if (error) throw new Error(error.message)
+}
 
-  const user = data.user
-  if (user) {
-    const profile: CarbonUser = {
-      uid: user.id,
-      name,
-      email,
-      photoURL: null,
-      score: 0,
-      level: 'Carbon Rookie',
-      badges: [],
-      responses: {},
-      streakCount: 0,
-      bestStreak: 0,
-      lastCheckIn: null,
-      lastAssessmentDate: null,
-      scoreHistory: [],
-      certificateId: null,
-      orgId: null,
-      streaks: [],
-    }
-    await upsertUser(user.id, profile)
-    useAuthStore.getState().setUser(profile)
-  }
-  return data
+export async function verifyOtp(email: string, token: string) {
+  const { error } = await supabase.auth.verifyOtp({
+    email,
+    token,
+    type: 'email',
+  })
+  if (error) throw new Error(error.message)
+}
+
+export async function setPassword(password: string) {
+  const { error } = await supabase.auth.updateUser({ password })
+  if (error) throw new Error(error.message)
+}
+
+export async function finishSignup(
+  name: string,
+  extraData: SignupExtraData,
+  onDone: () => void
+) {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('No authenticated user found.')
+
+  await upsertUser(user.id, {
+    email: user.email,
+    name: name.trim(),
+    score: null,
+    level: null,
+    account_type: extraData.account_type,
+    organization_name: extraData.organization_name ?? null,
+    organization_address: extraData.organization_address ?? null,
+    organization_email: extraData.organization_email ?? null,
+    organization_size: extraData.organization_size ?? null,
+    contact_name: extraData.contact_name ?? null,
+    contact_email: extraData.contact_email ?? null,
+    contact_phone: extraData.contact_phone ?? null,
+  })
+
+  await supabase.auth.updateUser({ data: { name: name.trim() } })
+
+  const profile = await getUser(user.id)
+  if (!profile) throw new Error('Could not load profile after signup.')
+
+  useAuthStore.getState().setUser(profile)
+  onDone()
 }
 
 export async function logoutUser() {
