@@ -26,6 +26,7 @@ export type OrgStackParamList = {
   OrgDashboard: undefined;
   CreateOrg: undefined;
   JoinOrg: undefined;
+  OrgImpact: undefined;
 };
 
 export type TabParamList = {

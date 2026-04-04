@@ -5,6 +5,7 @@ export type MainTabParamList = {
   DashboardTab: undefined;
   StreaksTab: undefined;
   ProfileTab: undefined;
+  OrgTab: undefined;
 };
 
 export type RootStackParamList = {
@@ -27,6 +28,5 @@ export type RootStackParamList = {
         date?: string;
       }
     | undefined;
-  OrgCalculator: undefined;
   CarbonRunner: undefined;
 };

@@ -29,7 +29,7 @@ export function HomeScreen() {
             <Button
               title="Organisational Impact"
               variant="secondary"
-              onPress={() => stackNav.navigate('OrgCalculator' as never)}
+              onPress={() => stackNav.navigate('Main', { screen: 'OrgTab' } as never)}
             />
           </View>
         </View>

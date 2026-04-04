@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { COLORS } from '../../constants/colors';
@@ -8,6 +9,7 @@ import { useAuthStore } from '../../store/authStore';
 import { getLevel } from '../../constants/levels';
 import { normalizeCarbonUser } from '../../utils/userHelpers';
 import { getStackNavigator } from '../../navigation/navigateRoot';
+import { getStreaks } from '../../services/db';
 import Svg, { Path } from 'react-native-svg';
 
 function Chevron({ color }: { color: string }) {
@@ -27,9 +29,19 @@ export function DashboardScreen() {
   const name = u?.name?.trim() || 'there';
   const score = u?.score ?? 0;
   const hasAssessment = Boolean(u?.lastAssessmentDate) || score > 0;
-  const streaks = u?.streaks ?? [];
-  const totalStreaks = streaks.reduce((acc, s) => acc + (s.currentStreak ?? 0), 0);
-  const topStreaks = [...streaks].sort((a, b) => b.currentStreak - a.currentStreak).slice(0, 5);
+  const [liveStreaks, setLiveStreaks] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (!u?.uid) return;
+    getStreaks(u.uid).then((data) => {
+      setLiveStreaks(data);
+    }).catch(() => {});
+  }, [u?.uid]);
+
+  const totalStreaks = liveStreaks.reduce((acc, s) => acc + (s.current_streak ?? 0), 0);
+  const topStreaks = [...liveStreaks]
+    .sort((a, b) => (b.current_streak ?? 0) - (a.current_streak ?? 0))
+    .slice(0, 5);
 
   if (!hydrated) {
     return (
@@ -103,9 +115,9 @@ export function DashboardScreen() {
         ) : (
           topStreaks.map((s) => (
             <Card key={s.id} style={{ marginBottom: 10, flexDirection: 'row', justifyContent: 'space-between' }}>
-              <Text style={[TYPOGRAPHY.body, { color: COLORS.textPrimary, flex: 1 }]}>{s.activityName}</Text>
+              <Text style={[TYPOGRAPHY.body, { color: COLORS.textPrimary, flex: 1 }]}>{s.activity_name}</Text>
               <Text style={[TYPOGRAPHY.section, { color: COLORS.gold }]}>
-                {s.currentStreak} 🔥
+                {s.current_streak} 🔥
               </Text>
             </Card>
           ))

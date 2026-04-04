@@ -17,7 +17,7 @@ const MENU_ITEMS: {
   { label: 'Dashboard', action: (n) => n.navigate('Main', { screen: 'DashboardTab' } as never) },
   { label: 'Assessment', action: (n) => n.navigate('AssessmentStart') },
   { label: 'Streaks', action: (n) => n.navigate('Main', { screen: 'StreaksTab' } as never) },
-  { label: 'Org Calculator', action: (n) => n.navigate('OrgCalculator') },
+  { label: 'Org Impact', action: (n) => n.navigate('Main', { screen: 'OrgTab' } as never) },
   { label: 'Profile', action: (n) => n.navigate('Main', { screen: 'ProfileTab' } as never) },
 ];
 

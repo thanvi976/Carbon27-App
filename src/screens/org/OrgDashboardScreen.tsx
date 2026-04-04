@@ -67,6 +67,8 @@ export function OrgDashboardScreen({ navigation }: Props) {
         <Button title="CREATE ORG" onPress={() => navigation.navigate('CreateOrg')} />
         <View style={{ height: 12 }} />
         <Button title="JOIN ORG" variant="secondary" onPress={() => navigation.navigate('JoinOrg')} />
+        <View style={{ height: 12 }} />
+        <Button title="ORGANISATIONAL IMPACT" onPress={() => navigation.navigate('OrgImpact')} />
       </View>
     );
   }
@@ -114,6 +116,9 @@ export function OrgDashboardScreen({ navigation }: Props) {
           ))
         )}
       </Card>
+
+      <View style={{ height: 14 }} />
+      <Button title="ORGANISATIONAL IMPACT" onPress={() => navigation.navigate('OrgImpact')} />
     </ScrollView>
   );
 }
