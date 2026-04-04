@@ -3,37 +3,95 @@ import { COLORS } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 import { Card } from '../../components/ui/Card';
 
-const sections = [
-  { title: '1. Platform Description', body: 'Carbon27 is a digital sustainability platform that enables individuals and organisations to measure, track, and improve their environmental impact. Features include Carbon Portrait, Organisational Impact, streak tracking, digital badges and certificates, and educational content.\n\nCarbon27 is intended for informational, educational, and motivational purposes only. It does not constitute professional environmental consulting or certified carbon auditing.' },
-  { title: '2. Eligibility & Account Access', body: 'To access Carbon27, you must be at least 13 years of age. Users between 13 and 18 must have parental or guardian consent. All information you provide must be accurate, current, and complete.\n\nYou are solely responsible for maintaining the confidentiality of your login credentials. Contact developer@carbon27.ai if you suspect unauthorised access.' },
-  { title: '3. Acceptable Use Policy', body: 'You may not attempt to gain unauthorised access to the platform, use automated scripts or bots, reverse engineer any part of the platform, upload harmful or illegal content, manipulate carbon scores or streaks, or impersonate any person or entity.\n\nViolations may result in immediate account suspension or termination without notice.' },
-  { title: '4. Carbon Scores & Certificates', body: 'All carbon scores, insights, and certificates are calculated from self-reported user inputs and publicly available emissions data. They are estimates for personal awareness and educational purposes only. They do not constitute official or certified environmental assessments and cannot be used for regulatory compliance.' },
-  { title: '5. Intellectual Property', body: 'All intellectual property rights in Carbon27 — including the brand name, logo, interface design, codebase, and content — are the exclusive property of Carbon27 or its licensors. You may not reproduce or commercially exploit any part of the platform without prior written consent.' },
-  { title: '6. Limitation of Liability', body: 'Carbon27 is provided "as is" without warranties of any kind. We are not liable for any indirect, incidental, or consequential damages, loss of data, or decisions made in reliance on platform outputs.\n\nIn no event shall Carbon27\'s total liability exceed the amount paid by the user, if any, for access to the platform.' },
-  { title: '7. Termination', body: 'Users may discontinue use and request account deletion by contacting developer@carbon27.ai. Carbon27 reserves the right to suspend or permanently terminate any account that violates these Terms.' },
-  { title: '8. Contact & Legal Notices', body: 'Carbon27\nEmail: developer@carbon27.ai\nWebsite: carbon27.ai\n\nTrack. Reduce. Sustain. Repeat.\nCarbon27 - Sustainability Platform' },
+const sections: { title: string; body: string }[] = [
+  {
+    title: '1. Platform Description',
+    body: 'Carbon27 is a digital sustainability platform that enables individuals and organisations to measure, track, and improve their environmental impact. The platform includes, but is not limited to, the following features:\n\nCarbon Portrait: a personal carbon footprint assessment tool\nOrganisational Impact: a calculator for company-level carbon analysis\nStreak tracking and daily habit logging\nDigital achievement badges and shareable certificates\nEducational content and sustainability insights\n\nCarbon27 is intended for informational, educational, and motivational purposes. It does not constitute professional environmental consulting or certified carbon auditing.',
+  },
+  {
+    title: '2. Eligibility & Account Access',
+    body: 'To access Carbon27, you represent and warrant that:\n\nYou are at least 13 years of age. Users between 13 and 18 must have parental or guardian consent.\nYou have the legal capacity to enter into binding digital agreements in your jurisdiction.\nAll information you provide during registration and platform use is accurate, current, and complete.\nYou are not prohibited from using the platform under applicable laws or regulations.\n\nWhere account creation is required, you are solely responsible for maintaining the confidentiality of your login credentials and for all activity conducted under your account. You agree to notify us promptly at developer@carbon27.ai if you suspect any unauthorised access.',
+  },
+  {
+    title: '3. Acceptable Use Policy',
+    body: 'You may use Carbon27 only for its intended purposes in compliance with these Terms and all applicable laws. The following are strictly prohibited:\n\nAttempting to gain unauthorised access to any part of the platform, its servers, or associated infrastructure\nUsing automated scripts, bots, crawlers, or scraping tools to extract platform data\nReverse engineering, decompiling, or attempting to extract source code from any part of the platform\nUploading, transmitting, or distributing any content that is harmful, deceptive, illegal, or in violation of third-party rights\nManipulating, falsifying, or gaming carbon scores, streaks, or any platform metrics\nUsing the platform in any manner that could impair, overburden, or disrupt services for other users\nImpersonating any person or entity or misrepresenting your affiliation with any organisation\n\nViolations of this policy may result in immediate account suspension or termination without notice.',
+  },
+  {
+    title: '4. User Data & Content',
+    body: 'You retain full ownership of all data and content you submit to Carbon27, including:\n\nCarbon footprint entries and assessment responses\nLifestyle and sustainability habit data\nStreak activity and progress records\nAny other inputs provided through platform features\n\nBy submitting content to Carbon27, you grant us a limited, non-exclusive, royalty-free, worldwide licence to process, store, and use that data solely for the purpose of providing and improving the platform services. We do not sell, lease, or monetise your personal data to third parties. Our data handling practices are further described in our Privacy Policy.',
+  },
+  {
+    title: '5. Carbon Scores, Insights & Certificates',
+    body: 'All carbon scores, sustainability insights, streak metrics, badge awards, and digital certificates generated by Carbon27:\n\nAre calculated exclusively from self-reported user inputs and publicly available emissions data\nAre estimates intended for personal awareness, motivation, and educational purposes only\nDo not constitute official, accredited, or certified environmental assessments\nCannot be used as evidence of regulatory compliance, environmental certification, or legal standing\nMay vary in accuracy depending on the quality and completeness of user-provided data\n\nCarbon27 does not guarantee the accuracy, completeness, or reliability of outputs generated by the platform. Users should consult qualified environmental professionals for compliance or regulatory purposes.',
+  },
+  {
+    title: '6. Intellectual Property',
+    body: "All intellectual property rights in and to the Carbon27 platform, including but not limited to the brand name, logo, interface design, UI/UX elements, codebase, certificate templates, content architecture, and feature logic, are the exclusive property of Carbon27 or its licensors.\n\nNothing in these Terms grants you any right, title, or interest in Carbon27's intellectual property. You may not reproduce, distribute, modify, create derivative works from, publicly display, or commercially exploit any part of the platform without our prior written consent.",
+  },
+  {
+    title: '7. Platform Availability & Modifications',
+    body: "Carbon27 is provided on a best-effort basis. While we strive to maintain reliable, uninterrupted service, we do not guarantee:\n\nContinuous or error-free availability of the platform or any specific feature\nThat the platform will meet every user's specific requirements or expectations\nPreservation of any particular feature, interface, or data output in perpetuity\n\nWe reserve the right to modify, suspend, or discontinue any aspect of the platform at any time, with or without notice. We will make reasonable efforts to communicate significant changes in advance where practicable.",
+  },
+  {
+    title: '8. Third-Party Services & Integrations',
+    body: 'Carbon27 may utilise third-party service providers for infrastructure, authentication, database management, email delivery, and analytics. While we apply due diligence in selecting these partners, we are not responsible for:\n\nService outages, data loss, or errors caused by third-party providers\nThe privacy practices or terms of service of third-party services\nAny content, products, or services offered by third parties linked from our platform\n\nYour interactions with any third-party services are governed by their respective terms and privacy policies. Use of third-party services is at your own discretion and risk.',
+  },
+  {
+    title: '9. Limitation of Liability',
+    body: 'To the maximum extent permitted under applicable laws, Carbon27, its founders, employees, contractors, and affiliates shall not be liable for any:\n\nIndirect, incidental, consequential, special, or punitive damages\nLoss of data, revenue, profits, or business opportunities\nDecisions made by users in reliance on platform outputs or estimates\nService interruptions, platform errors, or security incidents beyond our reasonable control\n\nThe platform is provided "as is" and "as available" without warranties of any kind, express or implied, including but not limited to warranties of merchantability, fitness for a particular purpose, or non-infringement.\n\nIn no event shall Carbon27\'s total liability exceed the amount paid by the user, if any, for access to the platform.',
+  },
+  {
+    title: '10. Termination',
+    body: 'Either party may terminate the user relationship at any time:\n\nUsers may discontinue use of the platform and request account deletion by contacting developer@carbon27.ai.\nCarbon27 reserves the right to suspend or permanently terminate any account that violates these Terms, engages in misuse, or poses a security risk to the platform or its users.\n\nUpon termination, your right to access the platform ceases immediately. Provisions of these Terms that by their nature should survive termination, including intellectual property rights, disclaimers, and limitations of liability, shall continue to apply.',
+  },
+  {
+    title: '11. Data Deletion & Account Closure',
+    body: 'Users may request permanent deletion of their account and all associated data by contacting developer@carbon27.ai. We will process such requests within a reasonable timeframe, subject to any technical and legal obligations that may require us to retain certain data.\n\nUpon confirmed deletion, your carbon entries, streak history, assessment responses, and profile data will be permanently removed from our active systems. Some anonymised, non-identifiable data may be retained for aggregate analytics purposes only.',
+  },
+  {
+    title: '12. Changes to These Terms',
+    body: 'We may revise these Terms periodically as the platform evolves. When we do:\n\nThe updated Terms will be published at carbon27.ai with a revised effective date.\nFor material changes, we will make reasonable efforts to notify active users via email or in-platform notification.\nContinued use of the platform following any update constitutes your acceptance of the revised Terms.\n\nWe encourage you to review these Terms periodically. If you do not agree with a revision, you must stop using the platform.',
+  },
+  {
+    title: '13. Dispute Resolution',
+    body: 'Any disputes arising out of or relating to these Terms or use of the platform shall first be attempted to be resolved through good-faith informal negotiation. If unresolved, disputes shall be handled in accordance with generally applicable digital service dispute resolution principles.',
+  },
+  {
+    title: '14. Contact & Legal Notices',
+    body: 'For questions, concerns, or legal notices relating to these Terms, please contact:\n\nCarbon27\nEmail: developer@carbon27.ai\nWebsite: carbon27.ai\n\nTrack. Reduce. Sustain. Repeat.\nCarbon27 - Sustainability Platform',
+  },
 ];
 
 export function TermsScreen() {
   return (
     <ScrollView style={{ flex: 1, backgroundColor: COLORS.bgPrimary }} contentContainerStyle={{ padding: 20, paddingTop: 60, paddingBottom: 60 }}>
-      <Text style={[TYPOGRAPHY.hero, { color: COLORS.textPrimary, marginBottom: 4 }]}>Terms of Service</Text>
-      <Text style={[TYPOGRAPHY.body, { color: COLORS.textMuted, marginBottom: 28 }]}>Effective Date: February 27, 2026</Text>
+      <Text style={[TYPOGRAPHY.hero, { color: COLORS.textPrimary, marginBottom: 8 }]}>Terms of Service</Text>
+      <Text style={[TYPOGRAPHY.body, { color: COLORS.textMuted, marginBottom: 28, lineHeight: 22 }]}>Effective Date: February 27, 2026</Text>
 
-      <Card style={{ marginBottom: 20, borderLeftWidth: 3, borderLeftColor: COLORS.gold }}>
+      <Card style={{ marginBottom: 28, borderLeftWidth: 3, borderLeftColor: COLORS.gold }}>
         <Text style={[TYPOGRAPHY.body, { color: COLORS.textMuted, lineHeight: 22 }]}>
-          These Terms constitute a legally binding agreement between you and Carbon27 governing your access to and use of the Carbon27 platform at carbon27.ai. By using Carbon27, you agree to be bound by these Terms.
+          {
+            'These Terms of Service ("Terms") constitute a legally binding agreement between you ("User", "you") and Carbon27 ("we", "us", "our") governing your access to and use of the Carbon27 platform, including all features, tools, and content available at carbon27.ai.\n\nBy accessing or using Carbon27 in any capacity, you acknowledge that you have read, understood, and agree to be bound by these Terms. If you do not agree, you must discontinue use of the platform immediately.'
+          }
         </Text>
       </Card>
 
       {sections.map((s) => (
-        <View key={s.title} style={{ marginBottom: 16 }}>
-          <Text style={[TYPOGRAPHY.section, { color: COLORS.textPrimary, marginBottom: 8 }]}>{s.title}</Text>
+        <View key={s.title} style={{ marginBottom: 20 }}>
+          <View style={{ borderBottomWidth: 0.5, borderBottomColor: COLORS.border, marginBottom: 12, paddingBottom: 10 }}>
+            <Text style={[TYPOGRAPHY.section, { color: COLORS.textPrimary, lineHeight: 26 }]}>{s.title}</Text>
+          </View>
           <Card>
             <Text style={[TYPOGRAPHY.body, { color: COLORS.textMuted, lineHeight: 22 }]}>{s.body}</Text>
           </Card>
         </View>
       ))}
+
+      <View style={{ marginTop: 8, paddingTop: 20, borderTopWidth: 0.5, borderTopColor: COLORS.border }}>
+        <Text style={[TYPOGRAPHY.body, { color: COLORS.textMuted, textAlign: 'center', lineHeight: 22 }]}>
+          Track. Reduce. Sustain. Repeat.{'\n'}Carbon27 - Sustainability Platform
+        </Text>
+      </View>
     </ScrollView>
   );
 }
