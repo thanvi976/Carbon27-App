@@ -99,15 +99,8 @@ export function ResultScreen(props: any) {
         await upsertUser(user.uid, {
           score,
           level: lv,
-          badges,
-          responses: responsesSnapshot,
-          lastAssessmentDate: now,
-          certificateId: certId,
-          scoreHistory: history,
-          streakCount: user.streakCount,
-          bestStreak: user.bestStreak,
-          lastCheckIn: user.lastCheckIn,
-          streaks: user.streaks ?? [],
+          email: user.email
+          
         });
         await recordAssessment({ uid: user.uid, score, level: lv, badges, responses: responsesSnapshot });
       } catch (e: any) {
