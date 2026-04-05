@@ -993,11 +993,17 @@ export function CarbonRunnerScreen() {
             ) : (
               <>
                 <Text style={styles.pauseTitle}>PAUSED</Text>
-                <Button title="Resume" variant="primary" onPress={resumeGame} />
-                <View style={{ height: 12 }} />
-                <Button title="Restart" variant="secondary" onPress={startGame} />
-                <View style={{ height: 12 }} />
-                <Button title="Exit" variant="secondary" onPress={requestExit} />
+                <View style={styles.pauseActionsWrap}>
+                  <TouchableOpacity style={styles.pauseActionPrimary} onPress={resumeGame}>
+                    <Text style={styles.pauseActionTextPrimary}>RESUME</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.pauseActionOutline} onPress={startGame}>
+                    <Text style={styles.pauseActionTextOutline}>RESTART</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.pauseActionOutline} onPress={requestExit}>
+                    <Text style={[styles.pauseActionTextOutline, { color: COLORS.textMuted }]}>EXIT</Text>
+                  </TouchableOpacity>
+                </View>
               </>
             )}
           </View>
@@ -1278,10 +1284,44 @@ const styles = StyleSheet.create({
     letterSpacing: 2,
   },
   pauseTitle: {
-    color: COLORS.textPrimary,
+    color: COLORS.textMuted,
     letterSpacing: 4,
-    fontSize: 24,
-    fontWeight: '300',
+    fontSize: 13,
+    fontWeight: '400',
+    marginBottom: 8,
+  },
+  pauseActionsWrap: {
+    width: '100%',
+    maxWidth: 280,
+    gap: 14,
+  },
+  pauseActionPrimary: {
+    width: '100%',
+    paddingVertical: 16,
+    backgroundColor: COLORS.gold,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  pauseActionOutline: {
+    width: '100%',
+    paddingVertical: 16,
+    borderWidth: 0.5,
+    borderColor: COLORS.border,
+    backgroundColor: 'transparent',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  pauseActionTextPrimary: {
+    fontSize: 12,
+    letterSpacing: 2,
+    fontWeight: '600',
+    color: COLORS.bgPrimary,
+  },
+  pauseActionTextOutline: {
+    fontSize: 12,
+    letterSpacing: 2,
+    fontWeight: '600',
+    color: COLORS.textPrimary,
   },
   gameOverTitle: {
     color: COLORS.error,
