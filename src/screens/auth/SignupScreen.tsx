@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { SvgXml } from 'react-native-svg';
 import {
@@ -551,6 +552,15 @@ export function SignupScreen(props: any) {
 
   const profileStepInner = (
     <>
+      {accountType !== null ? (
+        <TouchableOpacity
+          onPress={() => { setAccountType(null); setError(null); }}
+          style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16 }}
+        >
+          <Text style={[TYPOGRAPHY.body, { color: COLORS.gold }]}>‹ Back</Text>
+        </TouchableOpacity>
+      ) : null}
+
       {accountType === null ? (
         <>
           <View style={{ flexDirection: 'row', gap: 12, marginBottom: 18 }}>
@@ -672,18 +682,20 @@ export function SignupScreen(props: any) {
   );
 
   return (
-    <KeyboardAvoidingView
-      style={[
-        screenStyles.screen,
-        { justifyContent: step === 'profile' ? 'flex-start' : 'center' },
-      ]}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
-      {header}
-      {step === 'email' ? emailStep : null}
-      {step === 'otp' ? otpStep : null}
-      {step === 'password' ? passwordStep : null}
-      {step === 'profile' ? profileStep : null}
-    </KeyboardAvoidingView>
+    <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.bgPrimary }}>
+      <KeyboardAvoidingView
+        style={[
+          screenStyles.screen,
+          { justifyContent: step === 'profile' ? 'flex-start' : 'center' },
+        ]}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        {header}
+        {step === 'email' ? emailStep : null}
+        {step === 'otp' ? otpStep : null}
+        {step === 'password' ? passwordStep : null}
+        {step === 'profile' ? profileStep : null}
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }

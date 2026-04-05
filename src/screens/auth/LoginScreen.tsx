@@ -46,8 +46,13 @@ export function LoginScreen(props: any) {
     setError(null);
     setGoogleLoading(true);
     try {
-      await signInWithGoogle();
-      navigation.replace('Main' as never);
+      const { isNewUser, googleName } = await signInWithGoogle();
+      if (isNewUser) {
+        navigation.replace('Signup', { step: 'profile', googleName } as never);
+      } else {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        navigation.replace('Main' as never);
+      }
     } catch (e: any) {
       setError(e?.message ?? 'Google sign-in failed. Please try again.');
     } finally {
