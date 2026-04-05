@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { COLORS } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 import { Card } from '../../components/ui/Card';
@@ -31,12 +31,14 @@ export function DashboardScreen() {
   const hasAssessment = Boolean(u?.lastAssessmentDate) || score > 0;
   const [liveStreaks, setLiveStreaks] = useState<any[]>([]);
 
-  useEffect(() => {
-    if (!u?.uid) return;
-    getStreaks(u.uid).then((data) => {
-      setLiveStreaks(data);
-    }).catch(() => {});
-  }, [u?.uid]);
+  useFocusEffect(
+    useCallback(() => {
+      if (!u?.uid) return;
+      getStreaks(u.uid).then((data) => {
+        setLiveStreaks(data);
+      }).catch(() => {});
+    }, [u?.uid])
+  );
 
   const totalStreaks = liveStreaks.reduce((acc, s) => acc + (s.current_streak ?? 0), 0);
   const topStreaks = [...liveStreaks]
