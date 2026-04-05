@@ -40,7 +40,7 @@ export function ProfileScreen() {
     updateUser((prev) => ({ ...prev, name: nextName }));
     setEditing(false);
     try {
-      await upsertUser(u.uid, { name: nextName });
+      await upsertUser(u.uid, { name: nextName, email: u.email });
     } catch {
       // offline — local store already updated
     }
@@ -124,9 +124,11 @@ export function ProfileScreen() {
           <View style={{ height: 20 }} />
           <Text style={[TYPOGRAPHY.label, { color: COLORS.sage }]}>EMAIL</Text>
           <Text style={[TYPOGRAPHY.body, { color: COLORS.textPrimary, marginTop: 8 }]}>{email}</Text>
-          <Text style={[TYPOGRAPHY.body, { color: COLORS.textMuted, marginTop: 6, fontSize: 13 }]}>
-            Email cannot be changed
-          </Text>
+          {editing ? (
+            <Text style={[TYPOGRAPHY.body, { color: COLORS.textMuted, marginTop: 6, fontSize: 13 }]}>
+              Email cannot be changed
+            </Text>
+          ) : null}
 
           <View style={{ height: 20 }} />
           <Text style={[TYPOGRAPHY.label, { color: COLORS.sage }]}>CARBON SCORE</Text>
@@ -139,7 +141,7 @@ export function ProfileScreen() {
           )}
         </Card>
 
-        <View style={{ marginBottom: 16 }}>
+        <View style={{ marginBottom: 16, marginTop: 26 }}>
           <Text style={[TYPOGRAPHY.label, { color: COLORS.textMuted, marginBottom: 12 }]}>INFO</Text>
           {[
             { label: 'About Us', screen: 'About' },
