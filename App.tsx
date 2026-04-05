@@ -7,6 +7,7 @@ import { SplashScreen } from './src/screens/auth/SplashScreen';
 import { OnboardingScreen } from './src/screens/auth/OnboardingScreen';
 import { LoginScreen } from './src/screens/auth/LoginScreen';
 import { SignupScreen } from './src/screens/auth/SignupScreen';
+import { ForgotPasswordScreen } from './src/screens/auth/ForgotPasswordScreen';
 import { MainTabNavigator } from './src/navigation/MainTabNavigator';
 import { AssessmentStartScreen } from './src/screens/assessment/AssessmentStartScreen';
 import { QuizScreen } from './src/screens/assessment/QuizScreen';
@@ -51,6 +52,7 @@ export default function App() {
         <Stack.Screen name="Onboarding" component={OnboardingScreen} />
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Signup" component={SignupScreen} />
+        <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
         <Stack.Screen name="Main" component={MainTabNavigator} />
         <Stack.Screen name="AssessmentStart" component={AssessmentStartWrapped} />
         <Stack.Screen name="Quiz" component={QuizWrapped} />

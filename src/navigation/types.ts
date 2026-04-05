@@ -3,6 +3,7 @@ export type AuthStackParamList = {
   Onboarding: undefined;
   Login: undefined;
   Signup: { step?: 'profile'; googleName?: string } | undefined;
+  ForgotPassword: undefined;
 };
 
 export type HomeStackParamList = {

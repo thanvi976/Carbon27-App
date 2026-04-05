@@ -93,6 +93,10 @@ export function LoginScreen(props: any) {
       />
       {errors.password?.message ? <Text style={screenStyles.error}>{errors.password.message}</Text> : null}
 
+      <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')} style={{ marginTop: 6 }}>
+        <Text style={[screenStyles.body, { color: COLORS.textMuted }]}>Forgot password?</Text>
+      </TouchableOpacity>
+
       {error ? (
         <Text style={[screenStyles.error, { marginTop: 10 }]}>{error}</Text>
       ) : null}

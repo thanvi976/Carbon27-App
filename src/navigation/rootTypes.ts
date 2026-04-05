@@ -33,4 +33,5 @@ export type RootStackParamList = {
   Contact: undefined;
   PrivacyPolicy: undefined;
   Terms: undefined;
+  ForgotPassword: undefined;
 };
