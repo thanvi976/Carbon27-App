@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
-import { ScrollView, Text, View, Alert } from 'react-native';
+import { ScrollView, Text, View, Alert, TouchableOpacity } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 import { captureRef } from 'react-native-view-shot';
@@ -12,6 +13,7 @@ import { CertificateView } from './CertificateView';
 import { isoNow } from '../../utils/dateHelpers';
 
 export function CertificateScreen({ route }: any) {
+  const navigation = useNavigation();
   const params = route?.params || {};
   const certRef = useRef<any>(null);
 
@@ -109,6 +111,13 @@ export function CertificateScreen({ route }: any) {
       style={{ flex: 1, backgroundColor: COLORS.bgPrimary }}
       contentContainerStyle={{ padding: 20 }}
     >
+      <TouchableOpacity
+        onPress={() => route?.params ? navigation?.goBack?.() : null}
+        style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}
+      >
+        <Text style={[TYPOGRAPHY.body, { color: COLORS.gold }]}>‹ Back</Text>
+      </TouchableOpacity>
+
       <Text style={[TYPOGRAPHY.section, { color: COLORS.textPrimary }]}>
         Certificate
       </Text>
