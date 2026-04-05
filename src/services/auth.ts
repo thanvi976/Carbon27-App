@@ -1,7 +1,11 @@
+import * as WebBrowser from 'expo-web-browser'
+import * as AuthSession from 'expo-auth-session'
 import { supabase } from './supabase'
 import { useAuthStore } from '../store/authStore'
 import { getUser, upsertUser } from './db'
 import type { CarbonUser } from '../types'
+
+WebBrowser.maybeCompleteAuthSession()
 
 export type SignupExtraData = {
   account_type: 'personal' | 'organization'
@@ -102,4 +106,65 @@ export async function finishSignup(
 export async function logoutUser() {
   await supabase.auth.signOut()
   useAuthStore.getState().setUser(null)
+}
+
+export async function signInWithGoogle() {
+  const redirectUrl = AuthSession.makeRedirectUri({ scheme: 'carbon27', path: 'auth/callback' })
+  console.log('Redirect URL:', redirectUrl)
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: redirectUrl,
+      skipBrowserRedirect: true,
+    },
+  })
+
+  if (error) throw new Error(error.message)
+  if (!data?.url) throw new Error('No OAuth URL returned')
+
+  const result = await WebBrowser.openAuthSessionAsync(data.url, redirectUrl)
+
+  if (result.type !== 'success') throw new Error('Google sign-in was cancelled or failed')
+
+  const url = result.url
+  const fragment = url.split('#')[1] ?? url.split('?')[1] ?? ''
+  const paramEntries = Object.fromEntries(
+    fragment.split('&').map((pair) => pair.split('=').map(decodeURIComponent) as [string, string])
+  )
+  const accessToken = paramEntries['access_token'] ?? null
+  const refreshToken = paramEntries['refresh_token'] ?? null
+
+  if (!accessToken) throw new Error('No access token returned from Google')
+
+  const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
+    access_token: accessToken,
+    refresh_token: refreshToken ?? '',
+  })
+
+  if (sessionError) throw new Error(sessionError.message)
+
+  const user = sessionData.session?.user
+  if (!user) throw new Error('No user in session')
+
+  let profile = await getUser(user.id)
+  if (!profile) {
+    await upsertUser(user.id, {
+      email: user.email,
+      name: user.user_metadata?.full_name ?? user.user_metadata?.name ?? user.email?.split('@')[0] ?? 'User',
+      score: null,
+      level: null,
+      account_type: 'personal',
+      organization_name: null,
+      organization_address: null,
+      organization_email: null,
+      organization_size: null,
+      contact_name: null,
+      contact_email: null,
+      contact_phone: null,
+    })
+    profile = await getUser(user.id)
+  }
+
+  if (!profile) throw new Error('Could not load profile after Google sign-in')
+  useAuthStore.getState().setUser(profile)
 }

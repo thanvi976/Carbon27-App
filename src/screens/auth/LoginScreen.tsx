@@ -7,7 +7,8 @@ import { screenStyles } from '../_shared/styles';
 import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
 import { COLORS } from '../../constants/colors';
-import { loginEmailPassword } from '../../services/auth';
+import { loginEmailPassword, signInWithGoogle } from '../../services/auth';
+import { TYPOGRAPHY } from '../../constants/typography';
 
 const schema = z.object({
   email: z.string().email(),
@@ -19,6 +20,7 @@ export function LoginScreen(props: any) {
   const { navigation } = props;
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const {
     setValue,
     watch,
@@ -28,6 +30,19 @@ export function LoginScreen(props: any) {
 
   const email = watch('email');
   const password = watch('password');
+
+  const onGoogleSignIn = async () => {
+    setError(null);
+    setGoogleLoading(true);
+    try {
+      await signInWithGoogle();
+      navigation.replace('Main' as never);
+    } catch (e: any) {
+      setError(e?.message ?? 'Google sign-in failed. Please try again.');
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
 
   const onSubmit = handleSubmit(async (values) => {
     setError(null);
@@ -82,6 +97,28 @@ export function LoginScreen(props: any) {
         <Text style={[screenStyles.body, { color: COLORS.textMuted }]}>or</Text>
         <View style={{ flex: 1, height: 0.5, backgroundColor: COLORS.border }} />
       </View>
+
+      <View style={{ height: 18 }} />
+      <TouchableOpacity
+        onPress={onGoogleSignIn}
+        disabled={googleLoading}
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 10,
+          borderWidth: 1,
+          borderColor: COLORS.border,
+          paddingVertical: 14,
+          paddingHorizontal: 20,
+          backgroundColor: 'transparent',
+        }}
+      >
+        <Text style={{ fontSize: 18 }}>G</Text>
+        <Text style={[TYPOGRAPHY.label, { color: COLORS.textPrimary }]}>
+          {googleLoading ? 'SIGNING IN…' : 'CONTINUE WITH GOOGLE'}
+        </Text>
+      </TouchableOpacity>
 
       <View style={{ height: 18 }} />
       <TouchableOpacity onPress={() => navigation.navigate('Signup')}>

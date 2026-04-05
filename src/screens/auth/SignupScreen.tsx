@@ -12,6 +12,7 @@ import {
   finishSignup,
   sendOtp,
   setPassword,
+  signInWithGoogle,
   verifyOtp,
   type SignupExtraData,
 } from '../../services/auth';
@@ -50,6 +51,7 @@ export function SignupScreen(props: any) {
   const otpVerifyLock = useRef(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   const dotActive = { width: 20, height: 6, borderRadius: 3, backgroundColor: COLORS.gold };
   const dotInactive = { width: 6, height: 6, borderRadius: 3, backgroundColor: COLORS.border };
@@ -134,6 +136,19 @@ export function SignupScreen(props: any) {
     const t = setTimeout(() => otpRefs.current[0]?.focus(), 100);
     return () => clearTimeout(t);
   }, [step]);
+
+  const onGoogleSignIn = async () => {
+    setError(null);
+    setGoogleLoading(true);
+    try {
+      await signInWithGoogle();
+      navigation.replace('Main' as never);
+    } catch (e: any) {
+      setError(e?.message ?? 'Google sign-in failed. Please try again.');
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
 
   const onSendOtp = async () => {
     setError(null);
@@ -353,6 +368,34 @@ export function SignupScreen(props: any) {
         onPress={() => void onSendOtp()}
         disabled={loading || !accountType}
       />
+
+      <View style={{ height: 12 }} />
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+        <View style={{ flex: 1, height: 0.5, backgroundColor: COLORS.border }} />
+        <Text style={[TYPOGRAPHY.body, { color: COLORS.textMuted }]}>or</Text>
+        <View style={{ flex: 1, height: 0.5, backgroundColor: COLORS.border }} />
+      </View>
+      <View style={{ height: 12 }} />
+      <TouchableOpacity
+        onPress={onGoogleSignIn}
+        disabled={googleLoading}
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 10,
+          borderWidth: 1,
+          borderColor: COLORS.border,
+          paddingVertical: 14,
+          paddingHorizontal: 20,
+          backgroundColor: 'transparent',
+        }}
+      >
+        <Text style={{ fontSize: 18 }}>G</Text>
+        <Text style={[TYPOGRAPHY.label, { color: COLORS.textPrimary }]}>
+          {googleLoading ? 'SIGNING IN…' : 'CONTINUE WITH GOOGLE'}
+        </Text>
+      </TouchableOpacity>
 
       <View style={{ height: 18 }} />
       {backToLogin}
