@@ -55,7 +55,7 @@ export function DashboardScreen() {
 
   const rows: { label: string; onPress: () => void }[] = [
     { label: 'Take Assessment', onPress: () => stackNav.navigate('AssessmentStart' as never) },
-    { label: 'Play Carbon Runner 🎮', onPress: () => stackNav.navigate('CarbonRunner' as never) },
+    { label: 'RUN27 ⚡', onPress: () => stackNav.navigate('CarbonRunner' as never) },
     { label: 'Manage Streaks', onPress: () => navigation.navigate('StreaksTab' as never) },
   ];
   if (hasAssessment) {

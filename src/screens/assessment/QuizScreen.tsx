@@ -33,6 +33,11 @@ export function QuizScreen(props: any) {
   const progressPct = ((currentIndex + 1) / QUESTIONS.length) * 100;
   const microcopy = getMicrocopy(progressPct);
 
+  const shuffledOptions = useMemo(() => {
+    if (!q?.options) return [];
+    return [...q.options].sort(() => Math.random() - 0.5);
+  }, [q?.id ?? q?.text]);
+
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [dir, setDir] = useState<1 | -1>(1);
   const questionKey = useMemo(() => q.id, [q.id]);
@@ -213,7 +218,7 @@ export function QuizScreen(props: any) {
           </Text>
 
           <View style={{ gap: 12, marginBottom: 24 }}>
-            {q.options.map((opt) => {
+            {shuffledOptions.map((opt) => {
               const selected = answer === opt.value;
               return (
                 <Pressable
