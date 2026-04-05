@@ -127,4 +127,3 @@ export function LoginScreen(props: any) {
     </KeyboardAvoidingView>
   );
 }
-

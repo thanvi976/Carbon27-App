@@ -108,9 +108,9 @@ export async function logoutUser() {
   useAuthStore.getState().setUser(null)
 }
 
-export async function signInWithGoogle() {
+export async function signInWithGoogle(): Promise<{ isNewUser: boolean; googleName: string }> {
   const redirectUrl = AuthSession.makeRedirectUri({ scheme: 'carbon27', path: 'auth/callback' })
-  console.log('Redirect URL:', redirectUrl)
+
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
@@ -146,25 +146,20 @@ export async function signInWithGoogle() {
   const user = sessionData.session?.user
   if (!user) throw new Error('No user in session')
 
-  let profile = await getUser(user.id)
-  if (!profile) {
-    await upsertUser(user.id, {
-      email: user.email,
-      name: user.user_metadata?.full_name ?? user.user_metadata?.name ?? user.email?.split('@')[0] ?? 'User',
-      score: null,
-      level: null,
-      account_type: 'personal',
-      organization_name: null,
-      organization_address: null,
-      organization_email: null,
-      organization_size: null,
-      contact_name: null,
-      contact_email: null,
-      contact_phone: null,
-    })
-    profile = await getUser(user.id)
+  const googleName =
+    user.user_metadata?.full_name ??
+    user.user_metadata?.name ??
+    user.email?.split('@')[0] ??
+    'User'
+
+  const profile = await getUser(user.id)
+
+  if (profile) {
+    // Existing user — load into store; RootNavigator switches automatically
+    useAuthStore.getState().setUser(profile)
+    return { isNewUser: false, googleName }
   }
 
-  if (!profile) throw new Error('Could not load profile after Google sign-in')
-  useAuthStore.getState().setUser(profile)
+  // New user — session is live but no profile yet; caller handles navigation to profile setup
+  return { isNewUser: true, googleName }
 }

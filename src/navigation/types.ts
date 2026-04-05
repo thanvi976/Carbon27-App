@@ -2,7 +2,7 @@ export type AuthStackParamList = {
   Splash: undefined;
   Onboarding: undefined;
   Login: undefined;
-  Signup: undefined;
+  Signup: { step?: 'profile'; googleName?: string } | undefined;
 };
 
 export type HomeStackParamList = {

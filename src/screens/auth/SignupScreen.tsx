@@ -32,13 +32,15 @@ const isValidEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.
 const orgSizeOptions = ['1–50', '51–100', '101–500', '501–1000', '1000+'] as const;
 
 export function SignupScreen(props: any) {
-  const { navigation } = props;
-  const [step, setStep] = useState<Step>('email');
+  const { navigation, route } = props;
+  const initialStep: Step = route?.params?.step ?? 'email';
+  const initialName: string = route?.params?.googleName ?? '';
+  const [step, setStep] = useState<Step>(initialStep);
   const [accountType, setAccountType] = useState<AccountType | null>(null);
   const [email, setEmail] = useState('');
   const [password, setPasswordField] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [name, setName] = useState('');
+  const [name, setName] = useState(initialName);
   const [orgName, setOrgName] = useState('');
   const [orgAddress, setOrgAddress] = useState('');
   const [orgEmail, setOrgEmail] = useState('');
@@ -141,8 +143,12 @@ export function SignupScreen(props: any) {
     setError(null);
     setGoogleLoading(true);
     try {
-      await signInWithGoogle();
-      navigation.replace('Main' as never);
+      const { isNewUser, googleName } = await signInWithGoogle();
+      if (isNewUser) {
+        setName(googleName);
+        setStep('profile');
+      }
+      // Existing user: store is updated; RootNavigator switches automatically
     } catch (e: any) {
       setError(e?.message ?? 'Google sign-in failed. Please try again.');
     } finally {
@@ -482,7 +488,8 @@ export function SignupScreen(props: any) {
 
   const orgSizeRow = (
     <View style={{ marginBottom: 18 }}>
-      <Text style={[TYPOGRAPHY.label, { color: COLORS.textMuted, marginBottom: 8 }]}>ORGANIZATION SIZE</Text>
+      <Text style={[TYPOGRAPHY.label, { color: COLORS.textMuted, marginBottom: 4 }]}>ORGANIZATION SIZE</Text>
+      <Text style={[TYPOGRAPHY.body, { color: COLORS.textMuted, marginBottom: 10, fontSize: 11 }]}>Select size</Text>
       <View style={{ flexDirection: 'row', gap: 10 }}>
         {orgSizeOptions.map((opt) => {
           const selected = orgSize === opt;
@@ -513,38 +520,105 @@ export function SignupScreen(props: any) {
 
   const profileStepInner = (
     <>
-      <Input label="NAME" value={name} onChangeText={setName} placeholder="Your name" autoCapitalize="words" />
+      {accountType === null ? (
+        <>
+          <View style={{ flexDirection: 'row', gap: 12, marginBottom: 18 }}>
+            <TouchableOpacity
+              accessibilityRole="button"
+              onPress={() => { setError(null); setAccountType('personal'); }}
+              style={{
+                flex: 1,
+                borderWidth: 1,
+                borderColor: COLORS.border,
+                backgroundColor: 'transparent',
+                padding: 14,
+              }}
+            >
+              <Text style={[TYPOGRAPHY.section, { color: COLORS.textPrimary }]}>👤 Personal</Text>
+              <Text style={[TYPOGRAPHY.body, { color: COLORS.textSecondary, marginTop: 4 }]}>
+                Track your own carbon footprint
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              accessibilityRole="button"
+              onPress={() => { setError(null); setAccountType('organization'); }}
+              style={{
+                flex: 1,
+                borderWidth: 1,
+                borderColor: COLORS.border,
+                backgroundColor: 'transparent',
+                padding: 14,
+              }}
+            >
+              <Text style={[TYPOGRAPHY.section, { color: COLORS.textPrimary }]}>🏢 Organization</Text>
+              <Text style={[TYPOGRAPHY.body, { color: COLORS.textSecondary, marginTop: 4 }]}>
+                Manage sustainability for a company or team
+              </Text>
+            </TouchableOpacity>
+          </View>
+          {error ? <Text style={[screenStyles.error, { marginBottom: 10 }]}>{error}</Text> : null}
+        </>
+      ) : null}
+
+      <Input label="FULL NAME" value={name} onChangeText={setName} placeholder="Your name" autoCapitalize="words" />
 
       {accountType === 'organization' ? (
         <>
-          <Input label="ORGANIZATION NAME" value={orgName} onChangeText={setOrgName} placeholder="Your organization" />
+          {/* Organization Information */}
+          <View style={{ marginTop: 8, marginBottom: 14 }}>
+            <View style={{ height: 0.5, backgroundColor: COLORS.border, marginBottom: 14 }} />
+            <Text style={[TYPOGRAPHY.label, { color: COLORS.textMuted, letterSpacing: 1.5 }]}>
+              ORGANIZATION INFORMATION
+            </Text>
+          </View>
+
           <Input
-            label="ORGANIZATION ADDRESS"
+            label="ORGANIZATION NAME"
+            value={orgName}
+            onChangeText={setOrgName}
+            placeholder="Company or institution name"
+          />
+          <Input
+            label="ADDRESS"
             value={orgAddress}
             onChangeText={setOrgAddress}
-            placeholder="Optional"
+            placeholder="Street, city, country"
           />
           <Input
             label="OFFICIAL CONTACT EMAIL"
             value={orgEmail}
             onChangeText={setOrgEmail}
-            placeholder="you@company.com"
+            placeholder="contact@organization.com"
             keyboardType="email-address"
           />
           {orgSizeRow}
-          <Input label="CONTACT NAME" value={contactName} onChangeText={setContactName} placeholder="Full name" />
+
+          {/* Point of Contact */}
+          <View style={{ marginTop: 4, marginBottom: 14 }}>
+            <View style={{ height: 0.5, backgroundColor: COLORS.border, marginBottom: 14 }} />
+            <Text style={[TYPOGRAPHY.label, { color: COLORS.textMuted, letterSpacing: 1.5 }]}>
+              POINT OF CONTACT
+            </Text>
+          </View>
+
+          <Input
+            label="CONTACT NAME"
+            value={contactName}
+            onChangeText={setContactName}
+            placeholder="Name of primary contact"
+          />
           <Input
             label="CONTACT EMAIL"
             value={contactEmail}
             onChangeText={setContactEmail}
-            placeholder="you@company.com"
+            placeholder="contact@email.com"
             keyboardType="email-address"
           />
           <Input
-            label="CONTACT PHONE"
+            label="CONTACT PHONE NUMBER"
             value={contactPhone}
             onChangeText={setContactPhone}
-            placeholder="+1 555 123 4567"
+            placeholder="+91 9345678900"
             keyboardType="phone-pad"
           />
         </>
@@ -553,7 +627,7 @@ export function SignupScreen(props: any) {
       {error ? <Text style={[screenStyles.error, { marginTop: 10 }]}>{error}</Text> : null}
 
       <View style={{ height: 18 }} />
-      <Button title={loading ? 'LOADING…' : 'COMPLETE'} onPress={() => void onFinishProfile()} disabled={loading} />
+      <Button title={loading ? 'LOADING…' : 'COMPLETE SIGNUP'} onPress={() => void onFinishProfile()} disabled={loading} />
 
       <View style={{ height: 18 }} />
       {backToLogin}
