@@ -16,7 +16,7 @@ import { TYPOGRAPHY } from '../../constants/typography';
 
 type Step = 'email' | 'otp' | 'password';
 
-const OTP_LENGTH = 6;
+const OTP_LENGTH = 8;
 const RESEND_COOLDOWN = 60;
 
 const isValidEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
