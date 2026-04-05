@@ -44,11 +44,11 @@ const SURVIVAL_TICK_MS = 1000;
 const INVULN_MS = 1500;
 const BEST_SCORE_KEY = 'carbon_runner_best';
 const PLAYER_RENDER_SIZE = 50;
-const ORB_RENDER_SIZE = 24;
-const ORB_GLOW_PADDING = 6;
+const COIN_RENDER_SIZE = 28;
+const COIN_GLOW_PADDING = 8;
 const OBSTACLE_RENDER_WIDTH = 62;
 const OBSTACLE_RENDER_HEIGHT = 46;
-const MAX_PARTICLE_SLOTS = 4;
+const MAX_PARTICLE_SLOTS = 16;
 const MAX_POWER_UP_SLOTS = 3;
 const POWER_UP_SIZE = 42;
 
@@ -64,6 +64,7 @@ type EntitySlot = {
   xAnim: Animated.Value;
   yAnim: Animated.Value;
   opacity: Animated.Value;
+  offsetAnim: Animated.Value;
   type?: PowerUpType;
   obstacleType?: ObstacleType;
 };
@@ -87,6 +88,7 @@ function createSlots(count: number): EntitySlot[] {
     xAnim: new Animated.Value(0),
     yAnim: new Animated.Value(-1000),
     opacity: new Animated.Value(0),
+    offsetAnim: new Animated.Value(0),
   }));
 }
 
@@ -131,6 +133,8 @@ export function CarbonRunnerScreen() {
   const [shieldActive, setShieldActive] = useState(false);
   const [magnetActive, setMagnetActive] = useState(false);
   const [slowActive, setSlowActive] = useState(false);
+  const [coinsCollected, setCoinsCollected] = useState(0);
+  const [isInvulnerable, setIsInvulnerable] = useState(false);
 
   const scoreRef = useRef(0);
   const healthRef = useRef(INITIAL_HEALTH);
@@ -153,6 +157,7 @@ export function CarbonRunnerScreen() {
   const slowActiveRef = useRef(false);
   const slowUntilRef = useRef(0);
   const savedSpeedRef = useRef(0);
+  const playerVisualXRef = useRef(0);
 
   const playerXAnim = useRef(new Animated.Value(0)).current;
   const redFlash = useRef(new Animated.Value(0)).current;
@@ -164,6 +169,12 @@ export function CarbonRunnerScreen() {
   const comboOpacity = useRef(new Animated.Value(0)).current;
   const scoreScale = useRef(new Animated.Value(1)).current;
   const newBestScale = useRef(new Animated.Value(0.8)).current;
+  const masterCoinSpin = useRef(new Animated.Value(1)).current;
+
+  const coinXOffsetAnim = useRef(new Animated.Value(-(COIN_RENDER_SIZE / 2 + COIN_GLOW_PADDING))).current;
+  const playerXOffsetAnim = useRef(new Animated.Value((PLAYER_SIZE - PLAYER_RENDER_SIZE) / 2)).current;
+  const comboXOffsetAnim = useRef(new Animated.Value((PLAYER_SIZE - PLAYER_RENDER_SIZE) / 2 - 18)).current;
+  const powerUpXOffsetAnim = useRef(new Animated.Value(-POWER_UP_SIZE / 2)).current;
 
   const orbSlotsRef = useRef<EntitySlot[]>(createSlots(MAX_ORBS));
   const orbXRef = useRef<number[]>(Array(MAX_ORBS).fill(0));
@@ -179,9 +190,9 @@ export function CarbonRunnerScreen() {
     return centers[laneIndex(lane)];
   }, []);
 
-  const triggerFlash = useCallback((flash: Animated.Value) => {
+  const triggerFlash = useCallback((flash: Animated.Value, startOpacity = 0.55) => {
     flash.stopAnimation();
-    flash.setValue(0.55);
+    flash.setValue(startOpacity);
     Animated.timing(flash, {
       toValue: 0,
       duration: 200,
@@ -220,9 +231,11 @@ export function CarbonRunnerScreen() {
     (lane: Lane) => {
       playerLaneRef.current = lane;
       const targetX = laneCenterX(lane) - PLAYER_SIZE / 2;
-      Animated.timing(playerXAnim, {
+      playerXAnim.stopAnimation();
+      Animated.spring(playerXAnim, {
         toValue: targetX,
-        duration: 110,
+        tension: 280,
+        friction: 22,
         useNativeDriver: true,
       }).start();
     },
@@ -259,6 +272,8 @@ export function CarbonRunnerScreen() {
     setShieldActive(false);
     setMagnetActive(false);
     setSlowActive(false);
+    setCoinsCollected(0);
+    setIsInvulnerable(false);
     magnetToastOpacity.setValue(0);
     for (let i = 0; i < orbSlotsRef.current.length; i += 1) {
       const slot = orbSlotsRef.current[i];
@@ -271,9 +286,9 @@ export function CarbonRunnerScreen() {
     spawnEngineRef.current = createSpawnEngine(Date.now(), Date.now());
   }, [clearSlots, laneCenterX, magnetToastOpacity, syncPlayerLane]);
 
-  const spawnInSlot = useCallback((slots: EntitySlot[], lane: Lane, type?: PowerUpType) => {
+  const spawnInSlot = useCallback((slots: EntitySlot[], lane: Lane, type?: PowerUpType): EntitySlot | null => {
     const slot = slots.find((s) => !s.active);
-    if (!slot) return;
+    if (!slot) return null;
     slot.active = true;
     slot.id = `e-${entityIdRef.current++}`;
     slot.lane = lane;
@@ -285,12 +300,15 @@ export function CarbonRunnerScreen() {
     slot.type = type;
     if (!type) {
       slot.obstacleType = 'cloud';
+      const cfg = obstacleConfig(slot.obstacleType);
+      slot.offsetAnim.setValue(-cfg.width / 2);
     }
+    return slot;
   }, [laneCenterX]);
 
   const pickObstacleType = useCallback((orbCount: number): ObstacleType => {
-    if (orbCount >= 20 && orbCount % 20 === 0) return 'factory';
     if (orbCount >= 15 && orbCount % 15 === 0) return 'car';
+    if (orbCount >= 20 && orbCount % 20 === 0) return 'factory';
     if (orbCount < 10) return 'cloud';
     if (orbCount < 20) return Math.random() < 0.7 ? 'cloud' : 'factory';
     const r = Math.random();
@@ -305,13 +323,14 @@ export function CarbonRunnerScreen() {
       sizeW: number,
       sizeH: number,
       now: number,
+      frameScale: number,
+      playerVisualX: number,
       onHit: (slot: EntitySlot) => void,
       matchAllLanes = false
     ) => {
-      const moveScale = 1;
       for (const slot of slots) {
         if (!slot.active) continue;
-        slot.y += speedRef.current * moveScale;
+        slot.y += speedRef.current * frameScale;
         slot.yAnim.setValue(slot.y);
 
         if (slot.y > heightRef.current + 120) {
@@ -321,18 +340,12 @@ export function CarbonRunnerScreen() {
           continue;
         }
 
-        const sameLane = matchAllLanes || slot.lane === playerLaneRef.current;
-        if (!sameLane) continue;
-        const entityLeft = laneCenterX(slot.lane) - sizeW / 2;
-        const playerLeft = laneCenterX(playerLaneRef.current) - PLAYER_SIZE / 2;
-        const horizontalOverlap = matchAllLanes || Math.abs(entityLeft - playerLeft) <= 40;
+        const entityCenterX = laneCenterX(slot.lane);
+        const horizontalOverlap = matchAllLanes || Math.abs(entityCenterX - playerVisualX) <= (sizeW / 2 + PLAYER_SIZE / 2) * 0.75;
         const verticalOverlap = intersectsVertically(slot.y, sizeH, playerTop, playerBottom);
         if (horizontalOverlap && verticalOverlap) {
           onHit(slot);
         }
-      }
-      if (now >= invulnerableUntilRef.current) {
-        invulnerableUntilRef.current = 0;
       }
     },
     [laneCenterX, playerBottom, playerTop]
@@ -410,30 +423,33 @@ export function CarbonRunnerScreen() {
   }, [comboOpacity]);
 
   const playOrbBurst = useCallback((x: number, y: number) => {
-    const slot = particleSlotsRef.current.find((p) => !p.active);
-    if (!slot) return;
-    slot.active = true;
-    slot.baseX.setValue(x);
-    slot.baseY.setValue(y);
-    slot.dx.setValue(0);
-    slot.dy.setValue(0);
-    slot.opacity.setValue(1);
     const vectors = [
       { x: -18, y: -18 },
       { x: 18, y: -18 },
       { x: -18, y: 18 },
       { x: 18, y: 18 },
     ];
-    const vector = vectors[Math.floor(Math.random() * vectors.length)];
-    Animated.parallel([
-      Animated.timing(slot.dx, { toValue: vector.x, duration: 400, useNativeDriver: true }),
-      Animated.timing(slot.dy, { toValue: vector.y, duration: 400, useNativeDriver: true }),
-      Animated.timing(slot.opacity, { toValue: 0, duration: 400, useNativeDriver: true }),
-    ]).start(() => {
-      slot.active = false;
-      slot.baseX.setValue(-1000);
-      slot.baseY.setValue(-1000);
-    });
+    let vectorIdx = 0;
+    for (const slot of particleSlotsRef.current) {
+      if (vectorIdx >= vectors.length) break;
+      if (slot.active) continue;
+      const vector = vectors[vectorIdx++];
+      slot.active = true;
+      slot.baseX.setValue(x);
+      slot.baseY.setValue(y);
+      slot.dx.setValue(0);
+      slot.dy.setValue(0);
+      slot.opacity.setValue(1);
+      Animated.parallel([
+        Animated.timing(slot.dx, { toValue: vector.x, duration: 400, useNativeDriver: true }),
+        Animated.timing(slot.dy, { toValue: vector.y, duration: 400, useNativeDriver: true }),
+        Animated.timing(slot.opacity, { toValue: 0, duration: 400, useNativeDriver: true }),
+      ]).start(() => {
+        slot.active = false;
+        slot.baseX.setValue(-1000);
+        slot.baseY.setValue(-1000);
+      });
+    }
   }, []);
 
   const endGame = useCallback(() => {
@@ -452,6 +468,11 @@ export function CarbonRunnerScreen() {
       const frameScale = dt / 16.6667;
       const now = Date.now();
 
+      if (invulnerableUntilRef.current > 0 && now >= invulnerableUntilRef.current) {
+        invulnerableUntilRef.current = 0;
+        setIsInvulnerable(false);
+      }
+
       if (magnetActiveRef.current && now >= magnetUntilRef.current) {
         magnetActiveRef.current = false;
         setMagnetActive(false);
@@ -461,8 +482,6 @@ export function CarbonRunnerScreen() {
         setSlowActive(false);
         applyTierSpeed();
       }
-      speedRef.current += 0;
-
       const collectOrb = (slot: EntitySlot) => {
         const burstX = slot.x - 2;
         const burstY = slot.y + ORB_SIZE / 2 - 2;
@@ -471,13 +490,13 @@ export function CarbonRunnerScreen() {
         comboRef.current += 1;
         orbsCollectedRef.current += 1;
         applyTierSpeed();
+        setCoinsCollected(orbsCollectedRef.current);
         const gain = 10 * Math.min(5, Math.max(1, comboRef.current));
         scoreRef.current += gain;
         setScore(scoreRef.current);
         popScore();
         showCombo(comboRef.current);
         playOrbBurst(burstX, burstY);
-        triggerFlash(goldFlash);
         void safeHaptic(() =>
           HapticsModule?.impactAsync?.(HapticsModule.ImpactFeedbackStyle.Light) ?? Promise.resolve()
         );
@@ -502,7 +521,7 @@ export function CarbonRunnerScreen() {
           }
         }
       } else {
-        processEntities(orbSlotsRef.current, ORB_SIZE, ORB_SIZE, now, (slot) => {
+        processEntities(orbSlotsRef.current, ORB_SIZE, ORB_SIZE, now, frameScale, playerVisualXRef.current, (slot) => {
           if (!slot.active) return;
           collectOrb(slot);
         });
@@ -511,7 +530,7 @@ export function CarbonRunnerScreen() {
       for (const slot of obstacleSlotsRef.current) {
         if (!slot.active) continue;
         const cfg = obstacleConfig(slot.obstacleType ?? 'cloud');
-        slot.y += speedRef.current * cfg.speedMul;
+        slot.y += speedRef.current * cfg.speedMul * frameScale;
         slot.yAnim.setValue(slot.y);
         if (slot.y > heightRef.current + 120) {
           slot.active = false;
@@ -519,10 +538,9 @@ export function CarbonRunnerScreen() {
           slot.opacity.setValue(0);
           continue;
         }
-        if (slot.lane !== playerLaneRef.current) continue;
-        const entityLeft = slot.x - cfg.width / 2;
-        const playerLeft = laneCenterX(playerLaneRef.current) - PLAYER_SIZE / 2;
-        const horizontalOverlap = Math.abs(entityLeft - playerLeft) <= 40;
+        const entityCenterX = slot.x;
+        const playerCenterX = playerVisualXRef.current;
+        const horizontalOverlap = Math.abs(entityCenterX - playerCenterX) <= (cfg.width / 2 + PLAYER_SIZE / 2) * 0.75;
         const verticalOverlap = intersectsVertically(slot.y, cfg.height, playerTop, playerBottom);
         if (!horizontalOverlap || !verticalOverlap) continue;
         if (now < invulnerableUntilRef.current) continue;
@@ -531,13 +549,14 @@ export function CarbonRunnerScreen() {
         if (shieldActiveRef.current) {
           shieldActiveRef.current = false;
           setShieldActive(false);
-          triggerFlash(goldFlash);
+          triggerFlash(goldFlash, 0.38);
           continue;
         }
         comboRef.current = 0;
         setComboLabel('');
         comboOpacity.setValue(0);
         invulnerableUntilRef.current = now + INVULN_MS;
+        setIsInvulnerable(true);
         healthRef.current = Math.max(0, healthRef.current - 1);
         setHealth(healthRef.current);
         triggerFlash(redFlash);
@@ -552,7 +571,7 @@ export function CarbonRunnerScreen() {
         }
       }
 
-      processEntities(powerUpSlotsRef.current, POWER_UP_SIZE, POWER_UP_SIZE, now, (slot) => {
+      processEntities(powerUpSlotsRef.current, POWER_UP_SIZE, POWER_UP_SIZE, now, frameScale, playerVisualXRef.current, (slot) => {
         if (!slot.active || !slot.type) return;
         slot.active = false;
         slot.opacity.setValue(0);
@@ -602,10 +621,10 @@ export function CarbonRunnerScreen() {
           const obstacleLane = due.obstacle ? pickSpawnLane(engine, orbLane) : undefined;
           if (orbLane) spawnInSlot(orbSlotsRef.current, orbLane);
           if (obstacleLane) {
-            spawnInSlot(obstacleSlotsRef.current, obstacleLane);
-            const spawned = obstacleSlotsRef.current.find((s) => s.active && s.lane === obstacleLane && s.y === -80);
-            if (spawned) {
-              spawned.obstacleType = pickObstacleType(orbsCollectedRef.current);
+            const spawnedObstacle = spawnInSlot(obstacleSlotsRef.current, obstacleLane);
+            if (spawnedObstacle) {
+              spawnedObstacle.obstacleType = pickObstacleType(orbsCollectedRef.current);
+              spawnedObstacle.offsetAnim.setValue(-obstacleConfig(spawnedObstacle.obstacleType).width / 2);
             }
           }
           if (spawnPowerUp) {
@@ -619,28 +638,6 @@ export function CarbonRunnerScreen() {
           const r = Math.floor(Math.random() * 3);
           const powerType: PowerUpType = r === 0 ? 'shield' : r === 1 ? 'magnet' : 'slow';
           spawnInSlot(powerUpSlotsRef.current, powerLane, powerType);
-        }
-      }
-
-      for (const slot of orbSlotsRef.current) {
-        if (slot.active) {
-          if (!magnetActiveRef.current) {
-            slot.y += speedRef.current * (frameScale - 1);
-            slot.yAnim.setValue(slot.y);
-          }
-        }
-      }
-      for (const slot of obstacleSlotsRef.current) {
-        if (slot.active) {
-          const cfg = obstacleConfig(slot.obstacleType ?? 'cloud');
-          slot.y += speedRef.current * cfg.speedMul * (frameScale - 1);
-          slot.yAnim.setValue(slot.y);
-        }
-      }
-      for (const slot of powerUpSlotsRef.current) {
-        if (slot.active) {
-          slot.y += speedRef.current * (frameScale - 1);
-          slot.yAnim.setValue(slot.y);
         }
       }
 
@@ -775,6 +772,24 @@ export function CarbonRunnerScreen() {
     return () => loop.stop();
   }, [startBlink]);
 
+  useEffect(() => {
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(masterCoinSpin, { toValue: 0.18, duration: 380, useNativeDriver: true }),
+        Animated.timing(masterCoinSpin, { toValue: 1, duration: 380, useNativeDriver: true }),
+      ])
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [masterCoinSpin]);
+
+  useEffect(() => {
+    const listenerId = playerXAnim.addListener(({ value }) => {
+      playerVisualXRef.current = value + PLAYER_SIZE / 2;
+    });
+    return () => playerXAnim.removeListener(listenerId);
+  }, [playerXAnim]);
+
   const backgroundColor =
     score <= 50 ? '#0C0C0C' : score <= 150 ? '#0D110D' : score <= 300 ? '#0A130A' : '#081208';
   const smogOpacity = score <= 50 ? 0.4 : score <= 150 ? 0.2 : 0;
@@ -807,20 +822,23 @@ export function CarbonRunnerScreen() {
 
         {orbSlotsRef.current.map((slot, i) => (
           <Animated.View
-            key={`orb-slot-${i}`}
+            key={`coin-slot-${i}`}
             pointerEvents="none"
             style={[
-              styles.orbGlow,
+              styles.coinGlow,
               {
                 opacity: slot.opacity,
                 transform: [
-                  { translateX: Animated.add(slot.xAnim, new Animated.Value(-(ORB_RENDER_SIZE / 2 + ORB_GLOW_PADDING))) },
+                  { translateX: Animated.add(slot.xAnim, coinXOffsetAnim) },
                   { translateY: slot.yAnim },
+                  { scaleX: masterCoinSpin },
                 ],
               },
             ]}
           >
-            <View style={styles.orbInner} />
+            <View style={styles.coinBody}>
+              <View style={styles.coinInnerRing} />
+            </View>
           </Animated.View>
         ))}
 
@@ -856,7 +874,7 @@ export function CarbonRunnerScreen() {
                   borderColor: cfg.border,
                   opacity: slot.opacity,
                   transform: [
-                    { translateX: Animated.add(slot.xAnim, new Animated.Value(-cfg.width / 2)) },
+                    { translateX: Animated.add(slot.xAnim, slot.offsetAnim) },
                     { translateY: slot.yAnim },
                   ],
                 },
@@ -880,7 +898,7 @@ export function CarbonRunnerScreen() {
                   borderColor,
                   opacity: slot.opacity,
                   transform: [
-                    { translateX: Animated.add(slot.xAnim, new Animated.Value(-POWER_UP_SIZE / 2)) },
+                    { translateX: Animated.add(slot.xAnim, powerUpXOffsetAnim) },
                     { translateY: slot.yAnim },
                   ],
                 },
@@ -898,11 +916,11 @@ export function CarbonRunnerScreen() {
             {
               borderColor: shieldActive ? '#378ADD' : COLORS.gold,
               borderWidth: shieldActive ? 3 : 2,
-              transform: [
-                { translateX: Animated.add(playerXAnim, new Animated.Value((PLAYER_SIZE - PLAYER_RENDER_SIZE) / 2)) },
+                transform: [
+                { translateX: Animated.add(playerXAnim, playerXOffsetAnim) },
                 { translateY: heightRef.current - PLAYER_BOTTOM_OFFSET - PLAYER_SIZE + (PLAYER_SIZE - PLAYER_RENDER_SIZE) / 2 },
               ],
-              opacity: invulnerableUntilRef.current > Date.now() ? 0.6 : 1,
+              opacity: isInvulnerable ? 0.6 : 1,
             },
           ]}
         >
@@ -915,9 +933,11 @@ export function CarbonRunnerScreen() {
               <Animated.Text style={[TYPOGRAPHY.section, styles.score, { transform: [{ scale: scoreScale }] }]}>
                 {score}
               </Animated.Text>
-              {magnetActive ? <Text style={styles.scoreMagnet}>🧲</Text> : null}
             </View>
-            <Text style={styles.scoreLabel}>PTS</Text>
+            <View style={styles.coinHudRow}>
+              <Text style={styles.coinHudIcon}>🪙</Text>
+              <Text style={styles.coinHudCount}>{coinsCollected}</Text>
+            </View>
             {shieldActive ? <Text style={[styles.powerLabel, { color: '#378ADD' }]}>🛡️ SHIELD</Text> : null}
             {magnetActive ? <Text style={[styles.powerLabel, { color: '#C8B89A' }]}>🧲 MAGNET</Text> : null}
             {slowActive ? <Text style={[styles.powerLabel, { color: '#8B9E7E' }]}>⏳ SLOW</Text> : null}
@@ -937,7 +957,9 @@ export function CarbonRunnerScreen() {
           </View>
           <View style={styles.heartsWrap}>
             {heartSlots.map((i) => (
-              <View key={`heart-${i}`} style={[styles.heartBox, i < health ? styles.heartOn : styles.heartOff]} />
+              <Text key={`heart-${i}`} style={[styles.heartIcon, { opacity: i < health ? 1 : 0.18 }]}>
+                ❤️
+              </Text>
             ))}
           </View>
         </View>
@@ -954,7 +976,7 @@ export function CarbonRunnerScreen() {
               {
                 opacity: comboOpacity,
                 transform: [
-                  { translateX: Animated.add(playerXAnim, new Animated.Value((PLAYER_SIZE - PLAYER_RENDER_SIZE) / 2 - 18)) },
+                  { translateX: Animated.add(playerXAnim, comboXOffsetAnim) },
                   { translateY: heightRef.current - PLAYER_BOTTOM_OFFSET - PLAYER_SIZE - 28 },
                 ],
               },
@@ -1087,20 +1109,32 @@ const styles = StyleSheet.create({
     fontSize: 24,
     lineHeight: 20,
   },
-  orbGlow: {
+  coinGlow: {
     position: 'absolute',
-    width: ORB_RENDER_SIZE + ORB_GLOW_PADDING * 2,
-    height: ORB_RENDER_SIZE + ORB_GLOW_PADDING * 2,
-    borderRadius: 50,
-    padding: ORB_GLOW_PADDING,
-    backgroundColor: COLORS.sage,
-    opacity: 0.3,
+    width: COIN_RENDER_SIZE + COIN_GLOW_PADDING * 2,
+    height: COIN_RENDER_SIZE + COIN_GLOW_PADDING * 2,
+    borderRadius: (COIN_RENDER_SIZE + COIN_GLOW_PADDING * 2) / 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255, 200, 0, 0.16)',
   },
-  orbInner: {
-    width: ORB_RENDER_SIZE,
-    height: ORB_RENDER_SIZE,
-    borderRadius: 12,
-    backgroundColor: COLORS.sage,
+  coinBody: {
+    width: COIN_RENDER_SIZE,
+    height: COIN_RENDER_SIZE,
+    borderRadius: COIN_RENDER_SIZE / 2,
+    backgroundColor: '#FFD700',
+    borderWidth: 2.5,
+    borderColor: '#B8860B',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  coinInnerRing: {
+    width: COIN_RENDER_SIZE * 0.52,
+    height: COIN_RENDER_SIZE * 0.52,
+    borderRadius: COIN_RENDER_SIZE * 0.26,
+    borderWidth: 1.5,
+    borderColor: '#8B6914',
+    backgroundColor: '#FFC200',
   },
   obstacle: {
     position: 'absolute',
@@ -1131,10 +1165,10 @@ const styles = StyleSheet.create({
   },
   particleDot: {
     position: 'absolute',
-    width: 4,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: COLORS.sage,
+    width: 5,
+    height: 5,
+    borderRadius: 2.5,
+    backgroundColor: '#FFD700',
   },
   hud: {
     position: 'absolute',
@@ -1158,9 +1192,21 @@ const styles = StyleSheet.create({
     color: COLORS.gold,
     lineHeight: 24,
   },
-  scoreMagnet: {
-    color: COLORS.gold,
-    fontSize: 16,
+  coinHudRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    marginTop: 1,
+  },
+  coinHudIcon: {
+    fontSize: 11,
+    lineHeight: 14,
+  },
+  coinHudCount: {
+    color: '#FFD700',
+    fontSize: 11,
+    fontWeight: '600',
+    letterSpacing: 0.5,
   },
   scoreLabel: {
     marginTop: 0,
@@ -1201,18 +1247,11 @@ const styles = StyleSheet.create({
   },
   heartsWrap: {
     flexDirection: 'row',
-    gap: 6,
+    gap: 2,
   },
-  heartBox: {
-    width: 16,
-    height: 16,
-    borderRadius: 4,
-  },
-  heartOn: {
-    backgroundColor: COLORS.error,
-  },
-  heartOff: {
-    backgroundColor: '#2A2A2A',
+  heartIcon: {
+    fontSize: 16,
+    lineHeight: 20,
   },
   hudSeparator: {
     position: 'absolute',
@@ -1392,25 +1431,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     letterSpacing: 2,
     marginBottom: 4,
-  },
-  actionBtn: {
-    backgroundColor: COLORS.bgCard,
-    borderColor: COLORS.border,
-    borderWidth: 1,
-    borderRadius: 10,
-    paddingHorizontal: 22,
-    paddingVertical: 10,
-    minWidth: 140,
-  },
-  actionBtnPrimary: {
-    backgroundColor: '#2B2B2B',
-    borderColor: COLORS.gold,
-  },
-  actionText: {
-    color: COLORS.textPrimary,
-    textAlign: 'center',
-    fontSize: 16,
-    fontWeight: '400',
   },
   redFlash: {
     backgroundColor: 'rgba(196,120,90,0.4)',

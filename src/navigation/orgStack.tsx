@@ -37,7 +37,7 @@ export function OrgStackNavigator() {
       <Stack.Screen name="OrgDashboard" component={OrgDashboardScreen} />
       <Stack.Screen name="CreateOrg" component={CreateOrgScreen} />
       <Stack.Screen name="JoinOrg" component={JoinOrgScreen} />
-      <Stack.Screen name="OrgImpact" component={OrgImpactScreen} />
+      <Stack.Screen name="OrgImpact" component={OrgImpactScreen} options={{ headerShown: false }} />
     </Stack.Navigator>
   );
 }

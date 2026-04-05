@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { OrgStackParamList } from '../../navigation/types';
 import { COLORS } from '../../constants/colors';
@@ -56,7 +56,14 @@ export function OrgDashboardScreen({ navigation }: Props) {
 
   if (!activeOrg) {
     return (
-      <View style={{ flex: 1, backgroundColor: COLORS.bgPrimary, padding: 20, justifyContent: 'center' }}>
+      <View style={{ flex: 1, backgroundColor: COLORS.bgPrimary, padding: 20 }}>
+        <TouchableOpacity
+          onPress={() => navigation.getParent()?.goBack()}
+          style={{ flexDirection: 'row', alignItems: 'center', marginTop: 16, marginBottom: 32 }}
+        >
+          <Text style={{ color: COLORS.gold, fontSize: 18, marginRight: 4 }}>←</Text>
+          <Text style={{ color: COLORS.gold, fontSize: 14, letterSpacing: 0.5 }}>Back</Text>
+        </TouchableOpacity>
         <Text style={[TYPOGRAPHY.section, { color: COLORS.textPrimary }]}>Organisation</Text>
         <Text style={[TYPOGRAPHY.body, { color: COLORS.textMuted, marginTop: 10 }]}>
           Create or join an organisation to compare progress.

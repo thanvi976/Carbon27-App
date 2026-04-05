@@ -1,14 +1,16 @@
 import { useState } from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
 import emailjs from '@emailjs/react-native';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { OrgStackParamList } from '../../navigation/types';
 import { COLORS } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 import { Button } from '../../components/ui/Button';
@@ -21,7 +23,10 @@ const EMAILJS_PUBLIC_KEY = 'Qs0QubXnQxIObPD6H';
 
 emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
 
-export function OrgImpactScreen() {
+type Props = NativeStackScreenProps<OrgStackParamList, 'OrgImpact'>;
+
+export function OrgImpactScreen({ navigation }: Props) {
+  const insets = useSafeAreaInsets();
   const [companyName, setCompanyName] = useState('');
   const [country, setCountry] = useState('');
   const [state, setState] = useState('');
@@ -91,6 +96,19 @@ export function OrgImpactScreen() {
       style={{ flex: 1, backgroundColor: COLORS.bgPrimary }}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
+      <TouchableOpacity
+        onPress={() => navigation.goBack()}
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          paddingHorizontal: 20,
+          paddingTop: insets.top + 12,
+          paddingBottom: 12,
+        }}
+      >
+        <Text style={{ color: COLORS.gold, fontSize: 18, marginRight: 4 }}>←</Text>
+        <Text style={{ color: COLORS.gold, fontSize: 14, letterSpacing: 0.5 }}>Back</Text>
+      </TouchableOpacity>
       <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 60 }}>
         <Text style={[TYPOGRAPHY.section, { color: COLORS.textPrimary, marginBottom: 4 }]}>
           Organisational Impact
