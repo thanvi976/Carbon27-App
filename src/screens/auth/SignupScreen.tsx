@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { SvgXml } from 'react-native-svg';
 import {
   finishSignup,
   sendOtp,
@@ -21,6 +22,14 @@ import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
 import { COLORS } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
+
+const googleLogo = `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <path fill="#EA4335" d="M24 9.5c3.14 0 5.95 1.08 8.17 2.85l6.08-6.08C34.46 3.05 29.5 1 24 1 14.82 1 7.07 6.48 3.64 14.22l7.07 6.16C12.43 13.65 17.74 9.5 24 9.5z"/>
+  <path fill="#4285F4" d="M46.52 24.5c0-1.64-.15-3.22-.42-4.74H24v9.01h12.67c-.55 2.96-2.2 5.47-4.67 7.15l7.18 5.58C43.44 37.28 46.52 31.36 46.52 24.5z"/>
+  <path fill="#FBBC05" d="M10.71 28.62A14.6 14.6 0 0 1 9.5 24c0-1.6.28-3.15.77-4.61l-7.07-6.16A23.93 23.93 0 0 0 0 24c0 3.86.92 7.5 2.55 10.72l8.16-6.1z"/>
+  <path fill="#34A853" d="M24 47c5.5 0 10.12-1.82 13.5-4.95l-7.18-5.58c-1.88 1.26-4.29 2.03-6.32 2.03-6.26 0-11.57-4.15-13.29-9.88l-8.16 6.1C7.07 41.52 14.82 47 24 47z"/>
+</svg>`;
 
 type AccountType = 'personal' | 'organization';
 type Step = 'email' | 'otp' | 'password' | 'profile';
@@ -397,7 +406,7 @@ export function SignupScreen(props: any) {
           backgroundColor: 'transparent',
         }}
       >
-        <Text style={{ fontSize: 18 }}>G</Text>
+        <SvgXml xml={googleLogo} width={20} height={20} />
         <Text style={[TYPOGRAPHY.label, { color: COLORS.textPrimary }]}>
           {googleLoading ? 'SIGNING IN…' : 'CONTINUE WITH GOOGLE'}
         </Text>
