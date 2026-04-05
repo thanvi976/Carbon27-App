@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import { Animated, ScrollView, Share, Text, View } from 'react-native';
+import { Animated, ScrollView, Text, View } from 'react-native';
+import * as Sharing from 'expo-sharing';
+import { captureRef } from 'react-native-view-shot';
 import { COLORS } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 import { Button } from '../../components/ui/Button';
@@ -13,6 +15,7 @@ import { getBadge, getLevel } from '../../constants/levels';
 import { AppHeader } from '../../components/layout/AppHeader';
 import { getStackNavigator } from '../../navigation/navigateRoot';
 import { useNavigation } from '@react-navigation/native';
+import { CertificateView } from '../certificate/CertificateView';
 
 const TIPS: string[] = [
   'Use public transportation or carpool whenever possible',
@@ -48,6 +51,7 @@ export function ResultScreen(props: any) {
   const level = getLevel(effectiveScore);
   const badgeLabel = getBadge(effectiveScore);
 
+  const certRef = useRef<any>(null);
   const anim = useRef(new Animated.Value(0)).current;
   const particles = useRef(Array.from({ length: 16 }, () => new Animated.Value(0))).current;
   const [showConfetti, setShowConfetti] = useState(true);
@@ -122,9 +126,19 @@ export function ResultScreen(props: any) {
   const userName = user?.name ?? 'Member';
 
   const shareSummary = async () => {
-    const msg = `Carbon27 — My carbon score: ${effectiveScore}/100. Level: ${level}. Badge: ${badgeLabel}. Track yours at carbon27.ai`;
     try {
-      await Share.share({ message: msg });
+      await new Promise<void>(res => setTimeout(() => res(), 800));
+      const uri = await captureRef(certRef, {
+        format: 'png',
+        quality: 1,
+        result: 'tmpfile',
+        width: 1280,
+        height: 720,
+      });
+      await Sharing.shareAsync(uri, {
+        mimeType: 'image/png',
+        dialogTitle: 'Share your Carbon27 Certificate',
+      });
     } catch {
       /* user dismissed */
     }
@@ -226,6 +240,28 @@ export function ResultScreen(props: any) {
           onPress={() => stackNav.navigate('Main', { screen: 'DashboardTab' } as never)}
         />
       </ScrollView>
+
+      <View
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          opacity: 0.01,
+          pointerEvents: 'none',
+        }}
+      >
+        <CertificateView
+          ref={certRef}
+          data={{
+            certId,
+            name: userName,
+            score: effectiveScore,
+            level,
+            badge: badgeLabel,
+            date: isoNow(),
+          }}
+        />
+      </View>
     </View>
   );
 }
