@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import emailjs from '@emailjs/react-native';
 import { COLORS } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
@@ -27,7 +27,8 @@ const whyContact = [
   'Media inquiries',
 ];
 
-export function ContactScreen() {
+export function ContactScreen(props: any) {
+  const { navigation } = props;
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [subject, setSubject] = useState('');
@@ -73,7 +74,13 @@ export function ContactScreen() {
 
   return (
     <KeyboardAvoidingView style={{ flex: 1, backgroundColor: COLORS.bgPrimary }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <ScrollView contentContainerStyle={{ padding: 20, paddingTop: 60, paddingBottom: 60 }}>
+      <TouchableOpacity
+        onPress={() => navigation.goBack()}
+        style={{ paddingTop: 60, paddingHorizontal: 20, paddingBottom: 16, flexDirection: 'row', alignItems: 'center' }}
+      >
+        <Text style={[TYPOGRAPHY.body, { color: COLORS.gold }]}>‹ Back</Text>
+      </TouchableOpacity>
+      <ScrollView contentContainerStyle={{ padding: 20, paddingTop: 0, paddingBottom: 60 }}>
         <Text style={[TYPOGRAPHY.hero, { color: COLORS.textPrimary, marginBottom: 8 }]}>Get in Touch</Text>
         <Text style={[TYPOGRAPHY.body, { color: COLORS.textMuted, marginBottom: 8, lineHeight: 22 }]}>
           Have questions or feedback? We'd love to hear from you!

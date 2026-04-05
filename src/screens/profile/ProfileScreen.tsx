@@ -91,7 +91,12 @@ export function ProfileScreen() {
         </View>
 
         <View style={{ height: 26 }} />
-        <Text style={[TYPOGRAPHY.label, { color: COLORS.textMuted, marginBottom: 12 }]}>ACCOUNT INFORMATION</Text>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+          <Text style={[TYPOGRAPHY.label, { color: COLORS.textMuted }]}>ACCOUNT INFORMATION</Text>
+          <TouchableOpacity onPress={() => stackNav.navigate('EditProfile' as never)}>
+            <Text style={[TYPOGRAPHY.label, { color: COLORS.gold }]}>Edit Profile →</Text>
+          </TouchableOpacity>
+        </View>
         <Card>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
             <Text style={[TYPOGRAPHY.label, { color: COLORS.sage }]}>NAME</Text>

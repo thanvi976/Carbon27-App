@@ -1,4 +1,4 @@
-import { ScrollView, Text, View } from 'react-native';
+import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { COLORS } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 import { Card } from '../../components/ui/Card';
@@ -51,9 +51,17 @@ const steps = [
   },
 ];
 
-export function AboutScreen() {
+export function AboutScreen(props: any) {
+  const { navigation } = props;
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: COLORS.bgPrimary }} contentContainerStyle={{ padding: 20, paddingTop: 60, paddingBottom: 60 }}>
+    <View style={{ flex: 1, backgroundColor: COLORS.bgPrimary }}>
+      <TouchableOpacity
+        onPress={() => navigation.goBack()}
+        style={{ paddingTop: 60, paddingHorizontal: 20, paddingBottom: 16, flexDirection: 'row', alignItems: 'center' }}
+      >
+        <Text style={[TYPOGRAPHY.body, { color: COLORS.gold }]}>‹ Back</Text>
+      </TouchableOpacity>
+      <ScrollView contentContainerStyle={{ padding: 20, paddingTop: 0, paddingBottom: 60 }}>
       <Text style={[TYPOGRAPHY.hero, { color: COLORS.textPrimary, marginBottom: 12 }]}>About Carbon27</Text>
       <Text style={[TYPOGRAPHY.body, { color: COLORS.textMuted, marginBottom: 8, lineHeight: 24 }]}>
         Empowering individuals and organizations to define and reduce their carbon impact through precise insight and ongoing measurement.
@@ -141,6 +149,7 @@ export function AboutScreen() {
           Track. Reduce. Sustain. Repeat.{'\n'}Carbon27 - Sustainability Platform
         </Text>
       </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }

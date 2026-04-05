@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { SvgXml } from 'react-native-svg';
 import {
   finishSignup,
@@ -63,6 +64,8 @@ export function SignupScreen(props: any) {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const dotActive = { width: 20, height: 6, borderRadius: 3, backgroundColor: COLORS.gold };
   const dotInactive = { width: 6, height: 6, borderRadius: 3, backgroundColor: COLORS.border };
@@ -464,26 +467,45 @@ export function SignupScreen(props: any) {
 
   const passwordStep = (
     <View>
-      <Input
-        label="PASSWORD"
-        value={password}
-        onChangeText={(t) => {
-          setPasswordField(t);
-          setError(null);
-        }}
-        placeholder="••••••••"
-        secureTextEntry
-      />
-      <Input
-        label="CONFIRM PASSWORD"
-        value={confirmPassword}
-        onChangeText={(t) => {
-          setConfirmPassword(t);
-          setError(null);
-        }}
-        placeholder="••••••••"
-        secureTextEntry
-      />
+      <View style={{ marginBottom: 18 }}>
+        <Text style={[TYPOGRAPHY.label, { color: COLORS.textMuted, marginBottom: 8 }]}>PASSWORD</Text>
+        <View style={{ position: 'relative' }}>
+          <Input
+            label=""
+            value={password}
+            onChangeText={(t) => { setPasswordField(t); setError(null); }}
+            placeholder="••••••••"
+            secureTextEntry={!showPassword}
+            style={{ marginBottom: 0 }}
+          />
+          <TouchableOpacity
+            onPress={() => setShowPassword((prev) => !prev)}
+            style={{ position: 'absolute', right: 12, top: 0, bottom: 0, justifyContent: 'center' }}
+          >
+            <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={20} color={COLORS.textMuted} />
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      <View style={{ marginBottom: 18 }}>
+        <Text style={[TYPOGRAPHY.label, { color: COLORS.textMuted, marginBottom: 8 }]}>CONFIRM PASSWORD</Text>
+        <View style={{ position: 'relative' }}>
+          <Input
+            label=""
+            value={confirmPassword}
+            onChangeText={(t) => { setConfirmPassword(t); setError(null); }}
+            placeholder="••••••••"
+            secureTextEntry={!showConfirmPassword}
+            style={{ marginBottom: 0 }}
+          />
+          <TouchableOpacity
+            onPress={() => setShowConfirmPassword((prev) => !prev)}
+            style={{ position: 'absolute', right: 12, top: 0, bottom: 0, justifyContent: 'center' }}
+          >
+            <Ionicons name={showConfirmPassword ? 'eye-off-outline' : 'eye-outline'} size={20} color={COLORS.textMuted} />
+          </TouchableOpacity>
+        </View>
+      </View>
 
       {error ? <Text style={[screenStyles.error, { marginTop: 10 }]}>{error}</Text> : null}
 

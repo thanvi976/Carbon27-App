@@ -1,4 +1,4 @@
-import { ScrollView, Text, View } from 'react-native';
+import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { COLORS } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 import { Card } from '../../components/ui/Card';
@@ -62,9 +62,17 @@ const sections: { title: string; body: string }[] = [
   },
 ];
 
-export function TermsScreen() {
+export function TermsScreen(props: any) {
+  const { navigation } = props;
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: COLORS.bgPrimary }} contentContainerStyle={{ padding: 20, paddingTop: 60, paddingBottom: 60 }}>
+    <View style={{ flex: 1, backgroundColor: COLORS.bgPrimary }}>
+      <TouchableOpacity
+        onPress={() => navigation.goBack()}
+        style={{ paddingTop: 60, paddingHorizontal: 20, paddingBottom: 16, flexDirection: 'row', alignItems: 'center' }}
+      >
+        <Text style={[TYPOGRAPHY.body, { color: COLORS.gold }]}>‹ Back</Text>
+      </TouchableOpacity>
+      <ScrollView contentContainerStyle={{ padding: 20, paddingTop: 0, paddingBottom: 60 }}>
       <Text style={[TYPOGRAPHY.hero, { color: COLORS.textPrimary, marginBottom: 8 }]}>Terms of Service</Text>
       <Text style={[TYPOGRAPHY.body, { color: COLORS.textMuted, marginBottom: 28, lineHeight: 22 }]}>Effective Date: February 27, 2026</Text>
 
@@ -92,6 +100,7 @@ export function TermsScreen() {
           Track. Reduce. Sustain. Repeat.{'\n'}Carbon27 - Sustainability Platform
         </Text>
       </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }

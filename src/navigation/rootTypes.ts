@@ -34,4 +34,5 @@ export type RootStackParamList = {
   PrivacyPolicy: undefined;
   Terms: undefined;
   ForgotPassword: undefined;
+  EditProfile: undefined;
 };

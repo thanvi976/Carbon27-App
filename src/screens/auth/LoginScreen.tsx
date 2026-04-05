@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, Text, TouchableOpacity, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { SvgXml } from 'react-native-svg';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
@@ -30,6 +31,7 @@ export function LoginScreen(props: any) {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const {
     setValue,
     watch,
@@ -84,13 +86,25 @@ export function LoginScreen(props: any) {
       />
       {errors.email?.message ? <Text style={screenStyles.error}>{errors.email.message}</Text> : null}
 
-      <Input
-        label="PASSWORD"
-        value={password}
-        onChangeText={(t) => setValue('password', t, { shouldValidate: true })}
-        placeholder="••••••••"
-        secureTextEntry
-      />
+      <View style={{ marginBottom: 18 }}>
+        <Text style={[TYPOGRAPHY.label, { color: COLORS.textMuted, marginBottom: 8 }]}>PASSWORD</Text>
+        <View style={{ position: 'relative' }}>
+          <Input
+            label=""
+            value={password}
+            onChangeText={(t) => setValue('password', t, { shouldValidate: true })}
+            placeholder="••••••••"
+            secureTextEntry={!showPassword}
+            style={{ marginBottom: 0 }}
+          />
+          <TouchableOpacity
+            onPress={() => setShowPassword((prev) => !prev)}
+            style={{ position: 'absolute', right: 12, top: 0, bottom: 0, justifyContent: 'center' }}
+          >
+            <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={20} color={COLORS.textMuted} />
+          </TouchableOpacity>
+        </View>
+      </View>
       {errors.password?.message ? <Text style={screenStyles.error}>{errors.password.message}</Text> : null}
 
       <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')} style={{ marginTop: 6 }}>

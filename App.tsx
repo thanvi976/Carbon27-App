@@ -19,6 +19,7 @@ import { AboutScreen } from './src/screens/info/AboutScreen';
 import { ContactScreen } from './src/screens/info/ContactScreen';
 import { PrivacyPolicyScreen } from './src/screens/info/PrivacyPolicyScreen';
 import { TermsScreen } from './src/screens/info/TermsScreen';
+import { EditProfileScreen } from './src/screens/profile/EditProfileScreen';
 import { withAppHeader } from './src/components/layout/withAppHeader';
 import { COLORS } from './src/constants/colors';
 import type { RootStackParamList } from './src/navigation/rootTypes';
@@ -64,6 +65,7 @@ export default function App() {
         <Stack.Screen name="Contact" component={ContactScreen} options={infoScreenOptions} />
         <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} options={infoScreenOptions} />
         <Stack.Screen name="Terms" component={TermsScreen} options={infoScreenOptions} />
+        <Stack.Screen name="EditProfile" component={EditProfileScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

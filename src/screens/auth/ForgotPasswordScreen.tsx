@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../../services/supabase';
 import { screenStyles } from '../_shared/styles';
 import { Input } from '../../components/ui/Input';
@@ -28,6 +29,7 @@ export function ForgotPasswordScreen(props: any) {
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState<string[]>(() => Array(OTP_LENGTH).fill(''));
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [cooldown, setCooldown] = useState(0);
@@ -294,16 +296,25 @@ export function ForgotPasswordScreen(props: any) {
 
   const passwordStep = (
     <View>
-      <Input
-        label="NEW PASSWORD"
-        value={password}
-        onChangeText={(t) => {
-          setPassword(t);
-          setError(null);
-        }}
-        placeholder="••••••••"
-        secureTextEntry
-      />
+      <View style={{ marginBottom: 18 }}>
+        <Text style={[TYPOGRAPHY.label, { color: COLORS.textMuted, marginBottom: 8 }]}>NEW PASSWORD</Text>
+        <View style={{ position: 'relative' }}>
+          <Input
+            label=""
+            value={password}
+            onChangeText={(t) => { setPassword(t); setError(null); }}
+            placeholder="••••••••"
+            secureTextEntry={!showPassword}
+            style={{ marginBottom: 0 }}
+          />
+          <TouchableOpacity
+            onPress={() => setShowPassword((prev) => !prev)}
+            style={{ position: 'absolute', right: 12, top: 0, bottom: 0, justifyContent: 'center' }}
+          >
+            <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={20} color={COLORS.textMuted} />
+          </TouchableOpacity>
+        </View>
+      </View>
 
       {error ? <Text style={[screenStyles.error, { marginTop: 10 }]}>{error}</Text> : null}
 
