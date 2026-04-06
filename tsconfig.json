@@ -20,7 +20,7 @@
   },
   "include": [
     "App.tsx",
-    "index.ts",
+    "index.js",
     "src/**/*",
     "types/**/*.d.ts"
   ],
