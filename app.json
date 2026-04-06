@@ -17,12 +17,6 @@
     "plugins": [
       "expo-notifications",
       "expo-asset"
-    ],
-    "entryPoint": "./index.js",
-    "extra": {
-      "eas": {
-        "projectId": "53150c49-b5a6-43ec-82ff-bebb22a378c7"
-      }
-    }
+    ]
   }
 }
