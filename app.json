@@ -9,7 +9,10 @@
     "scheme": "carbon27",
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.carbon27.app"
+      "bundleIdentifier": "com.carbon27.app",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "package": "com.carbon27.app"
