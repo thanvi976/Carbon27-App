@@ -7,15 +7,21 @@
     "newArchEnabled": true,
     "userInterfaceStyle": "dark",
     "scheme": "carbon27",
+    "icon": "./assets/icon.png",
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.carbon27.app",
+      "icon": "./assets/icon.png",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
-      "package": "com.carbon27.app"
+      "package": "com.carbon27.app",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#000000"
+      }
     },
     "plugins": [
       "expo-notifications",
